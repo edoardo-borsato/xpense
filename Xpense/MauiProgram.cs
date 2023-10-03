@@ -34,10 +34,10 @@ public static class MauiProgram
         var filter = new DateFilter();
 
         var now = DateTimeOffset.Now;
-        var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
-        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-        filter.From = firstDayOfMonth;
-        filter.To = lastDayOfMonth;
+        var firstDayOfCurrentMonth = new DateTime(now.Year, now.Month, 1);
+        var firstDayOfNextMonth = firstDayOfCurrentMonth.AddMonths(1);
+        filter.From = firstDayOfCurrentMonth;
+        filter.To = firstDayOfNextMonth;
 
         return filter;
     }
