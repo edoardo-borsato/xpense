@@ -40,7 +40,7 @@ else
 @*BAR*@
     <RadzenCard>
         <RadzenChart>
-            <RadzenBarSeries Data="@_data" CategoryProperty="Month" Title="@_selectedYear.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense"/>
+            <RadzenBarSeries Data="@_dataGroupedByMonth" CategoryProperty="Month" Title="@_selectedYear.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense"/>
             <RadzenValueAxis Formatter="@Formatter.FormatAsEuro">
                 <RadzenGridLines Visible="true"/>
                 <RadzenAxisTitle Text="Total expenses"/>
@@ -48,9 +48,15 @@ else
             <RadzenBarOptions Radius="5"/>
         </RadzenChart>
     </RadzenCard>
+    <RadzenCard>
+        <RadzenChart>
+            <RadzenPieSeries Data="@_dataGroupedByCategory" Title="@_selectedYear.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense">
+            </RadzenPieSeries>
+        </RadzenChart>
+    </RadzenCard>
 @*COLUMN*@
 @*<RadzenChart>
-        <RadzenColumnSeries Data="@_data" CategoryProperty="Month" Title="@_date.Year.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense" />
+        <RadzenColumnSeries Data="@_dataGroupedByMonth" CategoryProperty="Month" Title="@_date.Year.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense" />
         <RadzenColumnOptions Radius="5" />
         <RadzenValueAxis Formatter="@Format">
             <RadzenGridLines Visible="true" />
@@ -60,7 +66,8 @@ else
 }
 @code {
     private IEnumerable<Xpense.Expense> _selectedYearExpenses = Array.Empty<Xpense.Expense>();
-    private IList<DataItem> _data;
+    private IList<MonthDataItem> _dataGroupedByMonth;
+    private IList<CategoryDataItem> _dataGroupedByCategory;
     private IList<int> _availableYears;
     private int _selectedYear;
     private double _averageExpensePerMonth;
@@ -70,7 +77,8 @@ else
         _selectedYear = DateTimeOffset.Now.Year;
         _averageExpensePerMonth = 0.0;
         InitializeAvailableYears();
-        _data = new List<DataItem>();
+        _dataGroupedByMonth = new List<MonthDataItem>();
+        _dataGroupedByCategory = new List<CategoryDataItem>();
         await GetExpensesAsync();
     }
 
@@ -98,10 +106,12 @@ else
             _selectedYearExpenses = (await ExpensesManager.GetAllAsync(null, null, _selectedYear.ToString()))
                 .OrderByDescending(e => e.ExpenseDetails.Date);
 
-            var groupedData = GroupDataByMonth();
+            var groupDataByMonth = GroupDataByMonth();
+            var groupedDataByCategory = GroupDataByCategory();
 
-            _data = FillDataForAllMonths(groupedData);
-            _averageExpensePerMonth = GetAverageExpensesPerMonth(_data);
+            _dataGroupedByMonth = FillDataForAllMonths(groupDataByMonth);
+            _dataGroupedByCategory = FillDataForAllCategories(groupedDataByCategory);
+            _averageExpensePerMonth = GetAverageExpensesPerMonth(_dataGroupedByMonth);
         }
         catch (Exception e)
         {
@@ -109,13 +119,29 @@ else
         }
     }
 
-    private static List<DataItem> FillDataForAllMonths(IReadOnlyCollection<DataItem> groupedData)
+    private static List<CategoryDataItem> FillDataForAllCategories(IReadOnlyCollection<CategoryDataItem> groupedData)
     {
-        var finalData = new List<DataItem>();
+        var finalData = new List<CategoryDataItem>();
+        foreach (var category in Enum.GetNames(typeof(Category)))
+        {
+            var categoryData = groupedData.FirstOrDefault(d => d.Category == category);
+            finalData.Add(categoryData ?? new CategoryDataItem
+            {
+                Category = category,
+                TotalExpense = 0
+            });
+        }
+
+        return finalData;
+    }
+
+    private static List<MonthDataItem> FillDataForAllMonths(IReadOnlyCollection<MonthDataItem> groupedData)
+    {
+        var finalData = new List<MonthDataItem>();
         for (var month = 1; month <= 12; month++)
         {
             var dataOfTheMonth = groupedData.FirstOrDefault(d => d.Month == month.ToString());
-            finalData.Add(dataOfTheMonth ?? new DataItem
+            finalData.Add(dataOfTheMonth ?? new MonthDataItem
                 {
                     Month = month.ToString(),
                     TotalExpense = 0
@@ -125,7 +151,7 @@ else
         return finalData;
     }
 
-    private double GetAverageExpensesPerMonth(IList<DataItem> data)
+    private double GetAverageExpensesPerMonth(IList<MonthDataItem> data)
     {
         var sumOfExpenses = 0.0;
         var finalMonth = 12;
@@ -146,26 +172,45 @@ else
         return averageExpensesPerMonth;
     }
 
-    private List<DataItem> GroupDataByMonth()
+    private List<MonthDataItem> GroupDataByMonth()
     {
-        return _selectedYearExpenses.Select(e => new DataItem
+        return _selectedYearExpenses.Select(e => new MonthDataItem
             {
                 Month = e.ExpenseDetails.Date.Month.ToString(),
                 TotalExpense = e.ExpenseDetails.Value
-            }).GroupBy(d => d.Month, d => d.TotalExpense, (month, totalExpenses) => new DataItem
+            }).GroupBy(d => d.Month, d => d.TotalExpense, (month, totalExpenses) => new MonthDataItem
             {
                 Month = month,
                 TotalExpense = totalExpenses.Sum()
             }).ToList();
     }
 
+    private List<CategoryDataItem> GroupDataByCategory()
+    {
+        return _selectedYearExpenses.Select(e => new CategoryDataItem
+        {
+            Category = e.ExpenseDetails.Category.ToString(),
+            TotalExpense = e.ExpenseDetails.Value
+            }).GroupBy(d => d.Category, d => d.TotalExpense, (category, totalExpenses) => new CategoryDataItem
+        {
+            Category = category,
+            TotalExpense = totalExpenses.Sum()
+        }).ToList();
+    }
+
     #endregion
 
     #region Utility Classes
 
-    private record DataItem
+    private record MonthDataItem
     {
         public string Month { get; set; }
+        public double TotalExpense { get; set; }
+    }
+
+    private record CategoryDataItem
+    {
+        public string Category { get; set; }
         public double TotalExpense { get; set; }
     }
 
