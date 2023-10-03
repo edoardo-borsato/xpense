@@ -5,7 +5,7 @@
 
 @if (Item == null)
 {
-    <p><em>Loading...</em></p>
+    <Loading />
 }
 else
 {
@@ -57,42 +57,42 @@ else
         }
         catch (Exception e)
         {
-            await DialogService.Alert(AlertType.Error, "Error", $"Unable to retrieve expense with ID {Id}. Error: {e}");
+            await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to retrieve expense with ID {Id}. Error: {e}");
         }
     }
 
     private async Task Submit()
     {
-        var confirmed = await DialogService.Confirm("Update expense", $"Are you sure you want to update expense with ID {Id}?");
+        var confirmed = await DialogService.ConfirmAsync("Update expense", $"Are you sure you want to update expense with ID {Id}?");
         if (confirmed)
         {
             try
             {
                 var updatedExpense = await ExpensesManager.UpdateAsync(Item.Id!.Value, Item.ExpenseDetails);
-                await DialogService.Alert(AlertType.Success, "Update expense", $"Expense with ID {updatedExpense.Id} has been updated");
+                await DialogService.AlertAsync(AlertType.Success, "Update expense", $"Expense with ID {updatedExpense.Id} has been updated");
                 Back();
             }
             catch (Exception e)
             {
-                await DialogService.Alert(AlertType.Error, "Error", $"Unable to update expense with ID {Id}. Error: {e}");
+                await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to update expense with ID {Id}. Error: {e}");
             }
         }
     }
 
     private async Task DeleteExpenseAsync()
     {
-        var confirmed = await DialogService.Confirm("Delete expense", $"Are you sure you want to delete expense with ID {Id}?");
+        var confirmed = await DialogService.ConfirmAsync("Delete expense", $"Are you sure you want to delete expense with ID {Id}?");
         if (confirmed)
         {
             try
             {
                 await ExpensesManager.DeleteAsync(Item.Id!.Value);
-                await DialogService.Alert(AlertType.Success, "Delete expense", $"Expense with ID {Id} has been deleted");
+                await DialogService.AlertAsync(AlertType.Success, "Delete expense", $"Expense with ID {Id} has been deleted");
                 Back();
             }
             catch (Exception e)
             {
-                await DialogService.Alert(AlertType.Error, "Error", $"Unable to delete expense with ID {Id}. Error: {e}");
+                await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to delete expense with ID {Id}. Error: {e}");
             }
         }
     }

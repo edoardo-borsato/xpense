@@ -4,11 +4,12 @@
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject IFormatter Formatter
+@inject ISettingsManager SettingsManager
 @inject DateFilter Filter
 
 @if (_expenses == null)
 {
-    <p><em>Loading...</em></p>
+    <Loading />
 }
 else
 {
@@ -77,7 +78,16 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await GetExpensesAsync();
+        var username = SettingsManager.GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            await DialogService.AlertAsync(AlertType.Info, "Username required", "No username has been configured, you will be redirected to the Settings page");
+            NavigationManager.NavigateTo("/settings");
+        }
+        else
+        {
+            await GetExpensesAsync();
+        }
     }
 
     private async Task ResetFilterAsync()
@@ -99,7 +109,7 @@ else
         }
         catch (Exception e)
         {
-            await DialogService.Alert(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
+            await DialogService.AlertAsync(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
         }
     }
 

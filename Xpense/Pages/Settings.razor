@@ -4,7 +4,7 @@
 
 @if (_settingsData == null)
 {
-    <p><em>Loading...</em></p>
+    <Loading />
 }
 else
 {
@@ -42,23 +42,23 @@ else
         }
         catch (Exception e)
         {
-            await DialogService.Alert(AlertType.Error, "Error", $"Unable to retrieve settings. Error: {e}");
+            await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to retrieve settings. Error: {e}");
         }
     }
 
     private async Task Submit()
     {
-        var confirmed = await DialogService.Confirm("Save settings", "Are you sure you want to save settings?");
+        var confirmed = await DialogService.ConfirmAsync("Save settings", "Are you sure you want to save settings?");
         if (confirmed)
         {
             try
             {
                 SettingsManager.SetUsername(_settingsData.Username);
-                await DialogService.Alert(AlertType.Success, "Save settings", "Settings saved");
+                await DialogService.AlertAsync(AlertType.Success, "Save settings", "Settings saved");
             }
             catch (Exception e)
             {
-                await DialogService.Alert(AlertType.Error, "Error", $"Unable to save settings. Error: {e}");
+                await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to save settings. Error: {e}");
             }
         }
     }

@@ -1,0 +1,30 @@
+﻿@page "/"
+@inject IDialogService DialogService
+@inject ISettingsManager SettingsManager
+@inject NavigationManager NavigationManager
+
+@if (!_settingsLoaded)
+{
+    <Loading />
+}
+
+
+@code {
+    private bool _settingsLoaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _settingsLoaded = false;
+        var username = SettingsManager.GetUsername();
+        _settingsLoaded = true;
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            await DialogService.AlertAsync(AlertType.Info, "Username required", "No username has been configured, you will be redirected to the Settings page");
+            NavigationManager.NavigateTo("/settings");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/dashboard");
+        }
+    }
+}

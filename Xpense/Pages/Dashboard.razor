@@ -1,47 +1,53 @@
-﻿@page "/"
+﻿@page "/dashboard"
 @using Xpense.Utility
 @inject ExpensesManager ExpensesManager
 @inject IDialogService DialogService
 @inject IFormatter Formatter
 
-<RadzenCard>
-    <div class="row">
-        <div class="col h4 font-weight-bold">
-            Count
+@if (_selectedYearExpenses == null)
+{
+    <Loading/>
+}
+else
+{
+    <RadzenCard>
+        <div class="row">
+            <div class="col h4 font-weight-bold">
+                Count
+            </div>
+            <div class="col h4">
+                @_selectedYearExpenses.Count()
+            </div>
         </div>
-        <div class="col h4">
-            @_expenses.Count()
+        <div class="row">
+            <div class="col h4 font-weight-bold">
+                Total
+            </div>
+            <div class="col h4">
+                @Formatter.FormatAsEuro(_selectedYearExpenses.Sum(e => e.ExpenseDetails.Value))
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col h4 font-weight-bold">
-            Total
+        <div class="row">
+            <div class="col h4 font-weight-bold">
+                AVG per month
+            </div>
+            <div class="col h4">
+                @Formatter.FormatAsEuro(_averageExpensePerMonth)
+            </div>
         </div>
-        <div class="col h4">
-            @Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))
-        </div>
-    </div>
-    <div class="row">
-        <div class="col h4 font-weight-bold">
-            AVG per month
-        </div>
-        <div class="col h4">
-            @Formatter.FormatAsEuro(_averageExpensePerMonth)
-        </div>
-    </div>
-</RadzenCard>
-<RadzenDropDown AllowClear="false" TValue="int" Class="w-100" Data="@_availableYears" Change="@(OnChange)" Value="@_selectedYear" />
+    </RadzenCard>
+    <RadzenDropDown AllowClear="false" TValue="int" Class="w-100" Data="@_availableYears" Change="@(OnChange)" Value="@_selectedYear"/>
 @*BAR*@
-<RadzenCard>
-    <RadzenChart>
-        <RadzenBarSeries Data="@_data" CategoryProperty="Month" Title="@_selectedYear.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense" />
-        <RadzenValueAxis Formatter="@Formatter.FormatAsEuro">
-            <RadzenGridLines Visible="true" />
-            <RadzenAxisTitle Text="Total expenses" />
-        </RadzenValueAxis>
-        <RadzenBarOptions Radius="5" />
-    </RadzenChart>
-</RadzenCard>
+    <RadzenCard>
+        <RadzenChart>
+            <RadzenBarSeries Data="@_data" CategoryProperty="Month" Title="@_selectedYear.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense"/>
+            <RadzenValueAxis Formatter="@Formatter.FormatAsEuro">
+                <RadzenGridLines Visible="true"/>
+                <RadzenAxisTitle Text="Total expenses"/>
+            </RadzenValueAxis>
+            <RadzenBarOptions Radius="5"/>
+        </RadzenChart>
+    </RadzenCard>
 @*COLUMN*@
 @*<RadzenChart>
         <RadzenColumnSeries Data="@_data" CategoryProperty="Month" Title="@_date.Year.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense" />
@@ -51,9 +57,9 @@
             <RadzenAxisTitle Text="Total expense" />
         </RadzenValueAxis>
     </RadzenChart>*@
-
+}
 @code {
-    private IEnumerable<Xpense.Expense> _expenses = Array.Empty<Xpense.Expense>();
+    private IEnumerable<Xpense.Expense> _selectedYearExpenses = Array.Empty<Xpense.Expense>();
     private IList<DataItem> _data;
     private IList<int> _availableYears;
     private int _selectedYear;
@@ -89,7 +95,7 @@
     {
         try
         {
-            _expenses = (await ExpensesManager.GetAllAsync(null, null, _selectedYear.ToString()))
+            _selectedYearExpenses = (await ExpensesManager.GetAllAsync(null, null, _selectedYear.ToString()))
                 .OrderByDescending(e => e.ExpenseDetails.Date);
 
             var groupedData = GroupDataByMonth();
@@ -99,7 +105,7 @@
         }
         catch (Exception e)
         {
-            await DialogService.Alert(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
+            await DialogService.AlertAsync(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
         }
     }
 
@@ -142,7 +148,7 @@
 
     private List<DataItem> GroupDataByMonth()
     {
-        return _expenses.Select(e => new DataItem
+        return _selectedYearExpenses.Select(e => new DataItem
             {
                 Month = e.ExpenseDetails.Date.Month.ToString(),
                 TotalExpense = e.ExpenseDetails.Value

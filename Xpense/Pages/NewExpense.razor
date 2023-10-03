@@ -5,7 +5,7 @@
 
 @if (Item == null)
 {
-    <p><em>Loading...</em></p>
+    <Loading />
 }
 else
 {
@@ -49,18 +49,18 @@ else
 
     private async Task Submit()
     {
-        var confirmed = await DialogService.Confirm("Create new expense", "Are you sure you want to create this new expense?");
+        var confirmed = await DialogService.ConfirmAsync("Create new expense", "Are you sure you want to create this new expense?");
         if (confirmed)
         {
             try
             {
                 var createdExpense = await ExpensesManager.CreateAsync(Item);
-                await DialogService.Alert(AlertType.Success, "New Expense created", $"New expense with ID {createdExpense.Id} has been created");
+                await DialogService.AlertAsync(AlertType.Success, "New Expense created", $"New expense with ID {createdExpense.Id} has been created");
                 NavigationManager.NavigateTo("expenses");
             }
             catch (Exception e)
             {
-                await DialogService.Alert(AlertType.Error, "Error", $"Unable to create new expense. Error: {e}");
+                await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to create new expense. Error: {e}");
             }
         }
     }

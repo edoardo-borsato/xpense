@@ -2,20 +2,20 @@
 
 internal interface IDialogService
 {
-    public Task<bool> Confirm(string title, string message);
-    public Task Alert(AlertType alertType, string title, string message);
+    public Task<bool> ConfirmAsync(string title, string message);
+    public Task AlertAsync(AlertType alertType, string title, string message);
 }
 
 internal class DialogService : IDialogService
 {
     private readonly Page _mainPage = Application.Current!.MainPage!;
 
-    public Task<bool> Confirm(string title, string message)
+    public Task<bool> ConfirmAsync(string title, string message)
     {
         return _mainPage.DisplayAlert(title, message, "Yes", "No");
     }
 
-    public Task Alert(AlertType alertType, string title, string message)
+    public Task AlertAsync(AlertType alertType, string title, string message)
     {
         return _mainPage.DisplayAlert($"{alertType}: {title}", message, "Ok");
     }
