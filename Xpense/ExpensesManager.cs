@@ -1,25 +1,23 @@
 ﻿using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Xpense.Settings;
 
 namespace Xpense
 {
     internal class ExpensesManager
     {
-        private readonly ExpensesServiceSettings _settings;
+        private readonly ISettingsManager _settingsManager;
 
-        public ExpensesManager(ISettingsManager configuration)
+        public ExpensesManager(ISettingsManager settingsManager)
         {
-            _settings = configuration.Get();
+            _settingsManager = settingsManager;
         }
 
         public async Task<IEnumerable<Expense>> GetAllAsync(string fromDate, string toDate, string inDate)
         {
             using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(_settings.Url);
-            var request = CreateGetExpensesRequest(fromDate, toDate, inDate, _settings.Credentials);
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateGetExpensesRequest(fromDate, toDate, inDate);
 
             var response = await httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -33,8 +31,8 @@ namespace Xpense
         public async Task<Expense> GetAsync(Guid id)
         {
             using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(_settings.Url);
-            var request = CreateGetExpenseRequest(id, _settings.Credentials);
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateGetExpenseRequest(id);
 
             var response = await httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -48,8 +46,8 @@ namespace Xpense
         public async Task<Expense> CreateAsync(ExpenseDetails expenseDetails)
         {
             using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(_settings.Url);
-            var request = CreateCreateExpenseRequest(expenseDetails, _settings.Credentials);
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateCreateExpenseRequest(expenseDetails);
 
             var response = await httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -63,8 +61,8 @@ namespace Xpense
         public async Task<Expense> UpdateAsync(Guid id, ExpenseDetails expenseDetails)
         {
             using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(_settings.Url);
-            var request = CreateUpdateExpenseRequest(id, expenseDetails, _settings.Credentials);
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateUpdateExpenseRequest(id, expenseDetails);
 
             var response = await httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -78,8 +76,8 @@ namespace Xpense
         public async Task DeleteAsync(Guid id)
         {
             using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(_settings.Url);
-            var request = CreateDeleteExpenseRequest(id, _settings.Credentials);
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateDeleteExpenseRequest(id);
 
             var response = await httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -90,52 +88,51 @@ namespace Xpense
 
         #region Utility Methods
 
-        private static void AddBasicAuthentication(HttpRequestMessage request, Credentials credentials)
+        private void AddUsernameHeader(HttpRequestMessage request)
         {
-            var authenticationString = GetAuthenticationString(credentials);
-            request.Headers.Add("Authorization", $"Basic {authenticationString}");
+            request.Headers.Add("Username", _settingsManager.GetUsername());
         }
 
-        private static HttpRequestMessage CreateGetExpensesRequest(string fromDate, string toDate, string inDate, Credentials credentials)
+        private HttpRequestMessage CreateGetExpensesRequest(string fromDate, string toDate, string inDate)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"api/expenses?from={fromDate}&to={toDate}&in={inDate}");
-            AddBasicAuthentication(request, credentials);
+            AddUsernameHeader(request);
             return request;
         }
 
-        private static HttpRequestMessage CreateGetExpenseRequest(Guid id, Credentials credentials)
+        private HttpRequestMessage CreateGetExpenseRequest(Guid id)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"api/expenses/{id}");
-            AddBasicAuthentication(request, credentials);
+            AddUsernameHeader(request);
             return request;
         }
 
-        private static HttpRequestMessage CreateCreateExpenseRequest(ExpenseDetails expenseDetails, Credentials credentials)
+        private HttpRequestMessage CreateCreateExpenseRequest(ExpenseDetails expenseDetails)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, "api/expenses");
             request.Content = JsonContent.Create(expenseDetails, null, new JsonSerializerOptions
             {
                 Converters = { new JsonStringEnumConverter() }
             });
-            AddBasicAuthentication(request, credentials);
+            AddUsernameHeader(request);
             return request;
         }
 
-        private static HttpRequestMessage CreateUpdateExpenseRequest(Guid id, ExpenseDetails expenseDetails, Credentials credentials)
+        private HttpRequestMessage CreateUpdateExpenseRequest(Guid id, ExpenseDetails expenseDetails)
         {
             var request = new HttpRequestMessage(HttpMethod.Put, $"api/expenses/{id}");
             request.Content = JsonContent.Create(expenseDetails, null, new JsonSerializerOptions
             {
                 Converters = { new JsonStringEnumConverter() }
             });
-            AddBasicAuthentication(request, credentials);
+            AddUsernameHeader(request);
             return request;
         }
 
-        private static HttpRequestMessage CreateDeleteExpenseRequest(Guid id, Credentials credentials)
+        private HttpRequestMessage CreateDeleteExpenseRequest(Guid id)
         {
             var request = new HttpRequestMessage(HttpMethod.Delete, $"api/expenses/{id}");
-            AddBasicAuthentication(request, credentials);
+            AddUsernameHeader(request);
             return request;
         }
 
@@ -170,18 +167,6 @@ namespace Xpense
             return expenses;
         }
 
-        private static string GetAuthenticationString(Credentials credentials)
-        {
-            if (credentials != null)
-            {
-                var authenticationString = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{credentials.Username}:{credentials.Password}"));
-
-                return authenticationString;
-            }
-
-            return null;
-        }
-
         #endregion
     }
 
@@ -205,15 +190,22 @@ namespace Xpense
         [JsonPropertyName("reason")]
         public string Reason { get; set; }
 
-        [JsonPropertyName("paymentMethod")]
-        public PaymentMethod PaymentMethod { get; set; }
+        [JsonPropertyName("category")]
+        public Category Category { get; set; }
     }
 
-    internal enum PaymentMethod
+    internal enum Category
     {
-        Undefined = 0,
-        Cash = 1,
-        DebitCard = 2,
-        CreditCard = 3
+        Others = 0,
+        HousingAndSupplies = 1,
+        HealthAndPersonalCare = 2,
+        Sport = 3,
+        Transportation = 4,
+        Clothing = 5,
+        Entertainment = 6,
+        BillsAndUtilities = 7,
+        Pets = 8,
+        Insurance = 9,
+        Gifts = 10
     }
 }

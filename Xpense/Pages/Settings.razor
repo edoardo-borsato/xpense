@@ -1,34 +1,27 @@
 ﻿@page "/settings"
-@using Xpense.Settings
 @inject IDialogService DialogService
 @inject ISettingsManager SettingsManager
 
-@if (SettingsData == null)
+@if (_settingsData == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <EditForm Model="SettingsData" OnSubmit="@Submit">
+    <EditForm Model="_settingsData" OnSubmit="@Submit">
         <table class="table">
             <tbody>
                 <tr class="h6">
                     <th>Username</th>
                 </tr>
                 <tr class="h6">
-                    <td><RadzenTextBox @bind-Value="@SettingsData.Credentials.Username" Class="w-100" /></td>
-                </tr>
-                <tr class="h6">
-                    <th>Password</th>
-                </tr>
-                <tr>
-                    <td><RadzenPassword @bind-Value="@SettingsData.Credentials.Password" Class="w-100" /></td>
+                    <td><RadzenTextBox @bind-Value="@_settingsData.Username" Class="w-100" /></td>
                 </tr>
                 <tr class="h6">
                     <th>Expenses service URL</th>
                 </tr>
                 <tr>
-                    <td><RadzenTextBox @bind-Value="@SettingsData.Url" Class="w-100" /></td>
+                    <td><RadzenTextBox @bind-Value="@_settingsData.Url" Class="w-100" ReadOnly="true" /></td>
                 </tr>
             </tbody>
         </table>
@@ -38,13 +31,14 @@ else
 
 @code {
 
-    private ExpensesServiceSettings SettingsData { get; set; }
+    private readonly ExpensesServiceSettings _settingsData = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            SettingsData = SettingsManager.Get();
+            _settingsData.Username = SettingsManager.GetUsername();
+            _settingsData.Url = SettingsManager.GetExpensesServiceUri().AbsoluteUri;
         }
         catch (Exception e)
         {
@@ -59,7 +53,7 @@ else
         {
             try
             {
-                SettingsManager.Set(SettingsData);
+                SettingsManager.SetUsername(_settingsData.Username);
                 await DialogService.Alert(AlertType.Success, "Save settings", "Settings saved");
             }
             catch (Exception e)
@@ -67,5 +61,11 @@ else
                 await DialogService.Alert(AlertType.Error, "Error", $"Unable to save settings. Error: {e}");
             }
         }
+    }
+
+    private record ExpensesServiceSettings
+    {
+        public string Username { get; set; }
+        public string Url { get; set; }
     }
 }

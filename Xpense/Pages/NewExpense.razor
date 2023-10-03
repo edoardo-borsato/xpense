@@ -27,8 +27,8 @@ else
                     <td><RadzenDatePicker @bind-Value=@Item.Date DateFormat="yyyy-MM-dd" Class="w-100" /></td>
                 </tr>
                 <tr class="h6">
-                    <th>PaymentMethod</th>
-                    <td><RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(PaymentMethod))" Change="@(OnPaymentMethodChange)" Value="@Item.PaymentMethod" /></td>
+                    <th>Category</th>
+                    <td><RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(Category))" Change="@(OnCategoryChange)" Value="@Item.Category" /></td>
                 </tr>
             </tbody>
         </table>
@@ -70,9 +70,9 @@ else
         NavigationManager.NavigateTo("expenses");
     }
 
-    private void OnPaymentMethodChange(object args)
+    private void OnCategoryChange(object args)
     {
         var value = args.ToString();
-        Item.PaymentMethod = Enum.Parse<PaymentMethod>(value!);
+        Item.Category = Enum.Parse<Category>(value!);
     }
 }
