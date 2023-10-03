@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Xpense.Utility;
+﻿using Xpense.Utility;
 
 namespace Xpense;
 
@@ -14,15 +13,6 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
-
-        //Preferences.Set("username", "user");
-        //Preferences.Set("password", "pass");
-        //Preferences.Set("expensesServiceUrl", "url");
-
-        
-        using var stream = FileSystem.OpenAppPackageFileAsync("appsettings.json").Result;
-        var config = new ConfigurationBuilder().AddJsonStream(stream).Build();
-        builder.Configuration.AddConfiguration(config);
 
         builder.Services.AddMauiBlazorWebView();
 #if DEBUG
