@@ -1,0 +1,115 @@
+﻿@page "/expenses"
+@using Xpense.Utility
+@inject ExpensesManager ExpensesManager
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject IFormatter Formatter
+@inject DateFilter Filter
+
+@if (_expenses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <RadzenCard>
+            <div class="row">
+                <div class="col h4 font-weight-bold">
+                    Count
+                </div>
+                <div class="col h4">
+                    @_expenses.Count()
+                </div>
+            </div>
+            <div class="row">
+                <div class="col h4 font-weight-bold">
+                    Total
+                </div>
+                <div class="col h4">
+                    @Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))
+                </div>
+            </div>
+        </RadzenCard>
+    </div>
+    <div>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th>From</th>
+                    <td><RadzenDatePicker @bind-Value=@Filter.From DateFormat="yyyy-MM-dd" Class="w-100" /></td>
+                </tr>
+                <tr>
+                    <th>To</th>
+                    <td><RadzenDatePicker @bind-Value=@Filter.To DateFormat="yyyy-MM-dd" Class="w-100" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary float-right" @onclick="@GetExpensesAsync">Apply</button>
+        <button class="btn btn-primary" @onclick="@ResetFilterAsync">Reset</button>
+    </div>
+    <br />
+    <div>
+        <h5>Details list</h5>
+        <table class="table">
+            <thead>
+                <tr class="h6">
+                    <th>Value</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var expense in _expenses)
+                {
+                    <tr class="h4" @onclick="@(() => GoToExpense(expense.Id))">
+                        <td>@Formatter.FormatAsEuro(expense.ExpenseDetails.Value)</td>
+                        <td>@expense.ExpenseDetails.Date.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <button class="btn btn-lg btn-primary fixed-action-btn rounded-circle" @onclick="@CreateNewExpense"><i class="oi oi-plus"></i></button>
+}
+
+@code {
+    private IEnumerable<Xpense.Expense> _expenses = Array.Empty<Xpense.Expense>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetExpensesAsync();
+    }
+
+    private async Task ResetFilterAsync()
+    {
+        var now = DateTimeOffset.Now;
+        var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+        Filter.From = firstDayOfMonth;
+        Filter.To = lastDayOfMonth;
+        await GetExpensesAsync();
+    }
+
+    private async Task GetExpensesAsync()
+    {
+        try
+        {
+            _expenses = (await ExpensesManager.GetAllAsync(Filter.From.ToString("yyyy-MM-dd"), Filter.To.ToString("yyyy-MM-dd"), null))
+                .OrderByDescending(e => e.ExpenseDetails.Date);
+        }
+        catch (Exception e)
+        {
+            await DialogService.Alert(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
+        }
+    }
+
+    private void GoToExpense(Guid? id)
+    {
+        NavigationManager.NavigateTo($"expense/{id}");
+    }
+
+    private void CreateNewExpense()
+    {
+        NavigationManager.NavigateTo("newexpense");
+    }
+}

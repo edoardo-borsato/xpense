@@ -1,0 +1,110 @@
+﻿@page "/expense/{id}"
+@inject ExpensesManager ExpensesManager
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+@if (Item == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="@Back">Back</button>
+    <br />
+    <EditForm Model="Item" OnSubmit="@Submit">
+        <table class="table">
+            <thead>
+                <tr class="h6">
+                    <th>Id</th>
+                    <td>@Item.Id</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="h6">
+                    <th>Value (€)</th>
+                    <td><RadzenNumeric ShowUpDown="false" TValue="double" @bind-Value="@Item.ExpenseDetails.Value" Class="w-100" /></td>
+                </tr>
+                <tr class="h6">
+                    <th>Reason</th>
+                    <td><RadzenTextBox @bind-Value="@Item.ExpenseDetails.Reason" Class="w-100" /></td>
+                </tr>
+                <tr class="h6">
+                    <th>Date</th>
+                    <td><RadzenDatePicker @bind-Value=@Item.ExpenseDetails.Date DateFormat="yyyy-MM-dd" Class="w-100" /></td>
+                </tr>
+                <tr class="h6">
+                    <th>PaymentMethod</th>
+                    <td><RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(PaymentMethod))" Change="@(OnPaymentMethodChange)" Value="@Item.ExpenseDetails.PaymentMethod" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary float-right" type="submit">Update</button>
+    </EditForm>
+    <button class="btn btn-primary float-left" @onclick="@DeleteExpenseAsync"><i class="oi oi-trash"></i></button>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private Xpense.Expense Item { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Item = await ExpensesManager.GetAsync(Guid.Parse(Id));
+        }
+        catch (Exception e)
+        {
+            await DialogService.Alert(AlertType.Error, "Error", $"Unable to retrieve expense with ID {Id}. Error: {e}");
+        }
+    }
+
+    private async Task Submit()
+    {
+        var confirmed = await DialogService.Confirm("Update expense", $"Are you sure you want to update expense with ID {Id}?");
+        if (confirmed)
+        {
+            try
+            {
+                var updatedExpense = await ExpensesManager.UpdateAsync(Item.Id!.Value, Item.ExpenseDetails);
+                await DialogService.Alert(AlertType.Success, "Update expense", $"Expense with ID {updatedExpense.Id} has been updated");
+                Back();
+            }
+            catch (Exception e)
+            {
+                await DialogService.Alert(AlertType.Error, "Error", $"Unable to update expense with ID {Id}. Error: {e}");
+            }
+        }
+    }
+
+    private async Task DeleteExpenseAsync()
+    {
+        var confirmed = await DialogService.Confirm("Delete expense", $"Are you sure you want to delete expense with ID {Id}?");
+        if (confirmed)
+        {
+            try
+            {
+                await ExpensesManager.DeleteAsync(Item.Id!.Value);
+                await DialogService.Alert(AlertType.Success, "Delete expense", $"Expense with ID {Id} has been deleted");
+                Back();
+            }
+            catch (Exception e)
+            {
+                await DialogService.Alert(AlertType.Error, "Error", $"Unable to delete expense with ID {Id}. Error: {e}");
+            }
+        }
+    }
+
+    private void Back()
+    {
+        NavigationManager.NavigateTo("expenses");
+    }
+
+    private void OnPaymentMethodChange(object args)
+    {
+        var value = args.ToString();
+        Item.ExpenseDetails.PaymentMethod = Enum.Parse<PaymentMethod>(value!);
+    }
+}

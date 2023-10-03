@@ -1,0 +1,71 @@
+﻿@page "/settings"
+@using Xpense.Settings
+@inject IDialogService DialogService
+@inject ISettingsManager SettingsManager
+
+@if (SettingsData == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="SettingsData" OnSubmit="@Submit">
+        <table class="table">
+            <tbody>
+                <tr class="h6">
+                    <th>Username</th>
+                </tr>
+                <tr class="h6">
+                    <td><RadzenTextBox @bind-Value="@SettingsData.Credentials.Username" Class="w-100" /></td>
+                </tr>
+                <tr class="h6">
+                    <th>Password</th>
+                </tr>
+                <tr>
+                    <td><RadzenPassword @bind-Value="@SettingsData.Credentials.Password" Class="w-100" /></td>
+                </tr>
+                <tr class="h6">
+                    <th>Expenses service URL</th>
+                </tr>
+                <tr>
+                    <td><RadzenTextBox @bind-Value="@SettingsData.Url" Class="w-100" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary float-right" type="submit">Save</button>
+    </EditForm>
+}
+
+@code {
+
+    private ExpensesServiceSettings SettingsData { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            SettingsData = SettingsManager.Get();
+        }
+        catch (Exception e)
+        {
+            await DialogService.Alert(AlertType.Error, "Error", $"Unable to retrieve settings. Error: {e}");
+        }
+    }
+
+    private async Task Submit()
+    {
+        var confirmed = await DialogService.Confirm("Save settings", "Are you sure you want to save settings?");
+        if (confirmed)
+        {
+            try
+            {
+                SettingsManager.Set(SettingsData);
+                await DialogService.Alert(AlertType.Success, "Save settings", "Settings saved");
+            }
+            catch (Exception e)
+            {
+                await DialogService.Alert(AlertType.Error, "Error", $"Unable to save settings. Error: {e}");
+            }
+        }
+    }
+}

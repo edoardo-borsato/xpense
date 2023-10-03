@@ -1,0 +1,167 @@
+﻿@page "/"
+@using Xpense.Utility
+@inject ExpensesManager ExpensesManager
+@inject IDialogService DialogService
+@inject IFormatter Formatter
+
+<RadzenCard>
+    <div class="row">
+        <div class="col h4 font-weight-bold">
+            Count
+        </div>
+        <div class="col h4">
+            @_expenses.Count()
+        </div>
+    </div>
+    <div class="row">
+        <div class="col h4 font-weight-bold">
+            Total
+        </div>
+        <div class="col h4">
+            @Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))
+        </div>
+    </div>
+    <div class="row">
+        <div class="col h4 font-weight-bold">
+            AVG per month
+        </div>
+        <div class="col h4">
+            @Formatter.FormatAsEuro(_averageExpensePerMonth)
+        </div>
+    </div>
+</RadzenCard>
+<RadzenDropDown AllowClear="false" TValue="int" Class="w-100" Data="@_availableYears" Change="@(OnChange)" Value="@_selectedYear" />
+@*BAR*@
+<RadzenCard>
+    <RadzenChart>
+        <RadzenBarSeries Data="@_data" CategoryProperty="Month" Title="@_selectedYear.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense" />
+        <RadzenValueAxis Formatter="@Formatter.FormatAsEuro">
+            <RadzenGridLines Visible="true" />
+            <RadzenAxisTitle Text="Total expenses" />
+        </RadzenValueAxis>
+        <RadzenBarOptions Radius="5" />
+    </RadzenChart>
+</RadzenCard>
+@*COLUMN*@
+@*<RadzenChart>
+        <RadzenColumnSeries Data="@_data" CategoryProperty="Month" Title="@_date.Year.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense" />
+        <RadzenColumnOptions Radius="5" />
+        <RadzenValueAxis Formatter="@Format">
+            <RadzenGridLines Visible="true" />
+            <RadzenAxisTitle Text="Total expense" />
+        </RadzenValueAxis>
+    </RadzenChart>*@
+
+@code {
+    private IEnumerable<Xpense.Expense> _expenses = Array.Empty<Xpense.Expense>();
+    private IList<DataItem> _data;
+    private IList<int> _availableYears;
+    private int _selectedYear;
+    private double _averageExpensePerMonth;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _selectedYear = DateTimeOffset.Now.Year;
+        _averageExpensePerMonth = 0.0;
+        InitializeAvailableYears();
+        _data = new List<DataItem>();
+        await GetExpensesAsync();
+    }
+
+    private void InitializeAvailableYears()
+    {
+        _availableYears = new List<int>();
+        for (var year = 2021; year <= DateTimeOffset.Now.Year; year++)
+        {
+            _availableYears.Add(year);
+        }
+    }
+
+    private async Task OnChange(object value)
+    {
+        _selectedYear = (int)value;
+        await GetExpensesAsync();
+    }
+
+    #region Utility Methods
+
+    private async Task GetExpensesAsync()
+    {
+        try
+        {
+            _expenses = (await ExpensesManager.GetAllAsync(null, null, _selectedYear.ToString()))
+                .OrderByDescending(e => e.ExpenseDetails.Date);
+
+            var groupedData = GroupDataByMonth();
+
+            _data = FillDataForAllMonths(groupedData);
+            _averageExpensePerMonth = GetAverageExpensesPerMonth(_data);
+        }
+        catch (Exception e)
+        {
+            await DialogService.Alert(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
+        }
+    }
+
+    private static List<DataItem> FillDataForAllMonths(IReadOnlyCollection<DataItem> groupedData)
+    {
+        var finalData = new List<DataItem>();
+        for (var month = 1; month <= 12; month++)
+        {
+            var dataOfTheMonth = groupedData.FirstOrDefault(d => d.Month == month.ToString());
+            finalData.Add(dataOfTheMonth ?? new DataItem
+                {
+                    Month = month.ToString(),
+                    TotalExpense = 0
+                });
+        }
+
+        return finalData;
+    }
+
+    private double GetAverageExpensesPerMonth(IList<DataItem> data)
+    {
+        var sumOfExpenses = 0.0;
+        var finalMonth = 12;
+        var now = DateTimeOffset.Now;
+
+        if (now.Year == _selectedYear)
+        {
+            finalMonth = now.Month;
+        }
+
+        for (var month = 1; month <= finalMonth; month++)
+        {
+            sumOfExpenses += data[month - 1].TotalExpense;
+        }
+
+        var averageExpensesPerMonth = sumOfExpenses / finalMonth;
+
+        return averageExpensesPerMonth;
+    }
+
+    private List<DataItem> GroupDataByMonth()
+    {
+        return _expenses.Select(e => new DataItem
+            {
+                Month = e.ExpenseDetails.Date.Month.ToString(),
+                TotalExpense = e.ExpenseDetails.Value
+            }).GroupBy(d => d.Month, d => d.TotalExpense, (month, totalExpenses) => new DataItem
+            {
+                Month = month,
+                TotalExpense = totalExpenses.Sum()
+            }).ToList();
+    }
+
+    #endregion
+
+    #region Utility Classes
+
+    private record DataItem
+    {
+        public string Month { get; set; }
+        public double TotalExpense { get; set; }
+    }
+
+    #endregion
+}
