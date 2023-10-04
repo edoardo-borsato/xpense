@@ -13,64 +13,73 @@
 }
 else
 {
-    <div>
-        <RadzenCard>
-            <div class="row">
-                <div class="col h4 font-weight-bold">
-                    Count
-                </div>
-                <div class="col h4">
-                    @_expenses.Count()
-                </div>
+
+    <RadzenCard>
+        <div class="row">
+            <div class="col h4 font-weight-bold">
+                Count
             </div>
-            <div class="row">
-                <div class="col h4 font-weight-bold">
-                    Total
-                </div>
-                <div class="col h4">
-                    @Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))
-                </div>
+            <div class="col h4">
+                @_expenses.Count()
             </div>
-        </RadzenCard>
-    </div>
-    <div>
-        <table class="table">
-            <tbody>
-                <tr>
-                    <th>From</th>
-                    <td><RadzenDatePicker @bind-Value=@Filter.From DateFormat="yyyy-MM-dd" Class="w-100" /></td>
-                </tr>
-                <tr>
-                    <th>To</th>
-                    <td><RadzenDatePicker @bind-Value=@Filter.To DateFormat="yyyy-MM-dd" Class="w-100" /></td>
-                </tr>
-            </tbody>
-        </table>
-        <button class="btn btn-primary float-right" @onclick="@GetExpensesAsync">Apply</button>
-        <button class="btn btn-primary" @onclick="@ResetFilterAsync">Reset</button>
-    </div>
+        </div>
+        <div class="row">
+            <div class="col h4 font-weight-bold">
+                Total
+            </div>
+            <div class="col h4">
+                @Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))
+            </div>
+        </div>
+    </RadzenCard>
+    <RadzenCard>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenText Text="From"></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenDatePicker @bind-Value=@Filter.From DateFormat="yyyy-MM-dd" Class="w-100" />
+            </RadzenColumn>
+        </RadzenRow>
+        <br />
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenText Text="To"></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenDatePicker @bind-Value=@Filter.To DateFormat="yyyy-MM-dd" Class="w-100" />
+            </RadzenColumn>
+        </RadzenRow>
+        <br />
+        <RadzenRow Gap="1rem" class="rz-text-align-center">
+            <RadzenColumn>
+                <RadzenButton Click=@ResetFilterAsync ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Text="Reset"></RadzenButton>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenButton Click=@GetExpensesAsync ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Text="Apply"></RadzenButton>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+    <RadzenCard>
+        <RadzenButton Click=@CreateNewExpense ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Icon="add" Text="Add new" Size="ButtonSize.Large"></RadzenButton>
+    </RadzenCard>
+    <RadzenCard>
+        <RadzenDataGrid RowClick="@RowClick" Data="@_expenses" TItem="Xpense.Expense" GridLines="DataGridGridLines.Default" AllowPaging="true" AllowSorting="false">
+            <Columns>
+                <RadzenDataGridColumn TItem="Xpense.Expense" Property="ExpenseDetails.Date" Title="Date">
+                    <Template Context="detail">
+                        @detail.ExpenseDetails.Date.ToString("yyyy-MM-dd")
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Xpense.Expense" Property="ExpenseDetails.Value" Title="Value">
+                    <Template Context="detail">
+                        @Formatter.FormatAsEuro(detail.ExpenseDetails.Value)
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenCard>
     <br />
-    <div>
-        <h5>Details list</h5>
-        <table class="table">
-            <thead>
-                <tr class="h6">
-                    <th>Value</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var expense in _expenses)
-                {
-                    <tr class="h4" @onclick="@(() => GoToExpense(expense.Id))">
-                        <td>@Formatter.FormatAsEuro(expense.ExpenseDetails.Value)</td>
-                        <td>@expense.ExpenseDetails.Date.ToString("yyyy-MM-dd")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    <button class="btn btn-lg btn-primary fixed-action-btn rounded-circle" @onclick="@CreateNewExpense"><i class="oi oi-plus"></i></button>
 }
 
 @code {
@@ -122,4 +131,10 @@ else
     {
         NavigationManager.NavigateTo("newexpense");
     }
+
+    private void RowClick(DataGridRowMouseEventArgs<Xpense.Expense> obj)
+    {
+        GoToExpense(obj.Data.Id);
+    }
+
 }
