@@ -15,22 +15,23 @@ else
 {
 
     <RadzenCard>
-        <div class="row">
-            <div class="col h4 font-weight-bold">
-                Count
-            </div>
-            <div class="col h4">
-                @_expenses.Count()
-            </div>
-        </div>
-        <div class="row">
-            <div class="col h4 font-weight-bold">
-                Total
-            </div>
-            <div class="col h4">
-                @Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))
-            </div>
-        </div>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4"><strong>Count</strong></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4" Text="@_expenses.Count().ToString()"></RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
+        <br />
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4"><strong>Total</strong></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4" Text="@Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))"></RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
     </RadzenCard>
     <RadzenCard>
         <RadzenRow Gap="1rem">
@@ -38,7 +39,7 @@ else
                 <RadzenText Text="From"></RadzenText>
             </RadzenColumn>
             <RadzenColumn>
-                <RadzenDatePicker @bind-Value=@Filter.From DateFormat="yyyy-MM-dd" Class="w-100" />
+                <RadzenDatePicker @bind-Value=@Filter.From DateFormat="yyyy-MM-dd" Class="w-100" Change="@GetExpensesAsync" />
             </RadzenColumn>
         </RadzenRow>
         <br />
@@ -47,20 +48,17 @@ else
                 <RadzenText Text="To"></RadzenText>
             </RadzenColumn>
             <RadzenColumn>
-                <RadzenDatePicker @bind-Value=@Filter.To DateFormat="yyyy-MM-dd" Class="w-100" />
+                <RadzenDatePicker @bind-Value=@Filter.To DateFormat="yyyy-MM-dd" Class="w-100" Change="@GetExpensesAsync" />
             </RadzenColumn>
         </RadzenRow>
         <br />
         <RadzenRow Gap="1rem" class="rz-text-align-center">
             <RadzenColumn>
-                <RadzenButton Click=@ResetFilterAsync ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Text="Reset"></RadzenButton>
-            </RadzenColumn>
-            <RadzenColumn>
-                <RadzenButton Click=@GetExpensesAsync ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Text="Apply"></RadzenButton>
+                <RadzenButton Click=@ResetFilterAsync ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Text="Reset to current month"></RadzenButton>
             </RadzenColumn>
         </RadzenRow>
     </RadzenCard>
-    <RadzenCard>
+    <RadzenCard class="rz-text-align-center">
         <RadzenButton Click=@CreateNewExpense ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Icon="add" Text="Add new" Size="ButtonSize.Large"></RadzenButton>
     </RadzenCard>
     <RadzenCard>
