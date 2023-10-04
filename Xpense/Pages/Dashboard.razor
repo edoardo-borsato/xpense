@@ -42,20 +42,21 @@ else
                 <RadzenDropDown AllowClear="false" TValue="int" Class="w-100" Data="@_availableYears" Change="@(OnYearChange)" Value="@_selectedYear" />
             </div>
             <div class="col h4">
-                <RadzenDropDown AllowClear="false" TValue="string" Class="w-100" Data="@_availableMonths" Change="@(OnMonthChange)" Value="@_selectedMonth" />
+                <RadzenDropDown AllowClear="false" TValue="string" Class="w-100" Data="@_availableMonths" Change="@(OnMonthChange)" Value="@_selectedMonth.ToString()" />
             </div>
         </div>
     </RadzenCard>
     
 @*BAR*@
-    <RadzenCard>
-        <RadzenChart Visible="@(_selectedMonth is not Month.AllMonths)">
-            <RadzenPieSeries Data="@_selectedMonthDataGroupedByCategory" Title="@_selectedMonth.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense">
+    <RadzenCard Visible="@(_selectedMonth is not Month.AllMonths)">
+        <RadzenChart>
+            <RadzenPieSeries Data="@_selectedMonthDataGroupedByCategory" Title="@_selectedMonth.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense" Fills="@PASTEL_COLOR_PALETTE">
             </RadzenPieSeries>
+            <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
         </RadzenChart>
     </RadzenCard>
-    <RadzenCard>
-        <RadzenChart Visible="@(_selectedMonth is Month.AllMonths)">
+    <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
+        <RadzenChart>
             <RadzenBarSeries Data="@_allYearDataGroupedByMonth" CategoryProperty="Month" Title="@_selectedYear.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense"/>
             <RadzenValueAxis Formatter="@Formatter.FormatAsEuro">
                 <RadzenGridLines Visible="true"/>
@@ -64,10 +65,11 @@ else
             <RadzenBarOptions Radius="5"/>
         </RadzenChart>
     </RadzenCard>
-    <RadzenCard>
-        <RadzenChart Visible="@(_selectedMonth is Month.AllMonths)">
-            <RadzenPieSeries Data="@_allYearDataGroupedByCategory" Title="@_selectedYear.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense">
+    <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
+        <RadzenChart>
+            <RadzenPieSeries Data="@_allYearDataGroupedByCategory" Title="@_selectedYear.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense" Fills="@PASTEL_COLOR_PALETTE">
             </RadzenPieSeries>
+            <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
         </RadzenChart>
     </RadzenCard>
 @*COLUMN*@
@@ -86,10 +88,26 @@ else
     private IList<CategoryDataItem> _allYearDataGroupedByCategory;
     private IList<CategoryDataItem> _selectedMonthDataGroupedByCategory;
     private IList<int> _availableYears;
-    private IList<Month> _availableMonths;
+    private IList<string> _availableMonths;
     private int _selectedYear;
     private Month _selectedMonth;
     private double _averageExpensePerMonth;
+
+    private static readonly IList<string> PASTEL_COLOR_PALETTE = new List<string>
+    {
+        "#75ABF0",
+        "#9C75F0",
+        "#F075E8",
+        "#F0758C",
+        "#F0BA75",
+        "#C9F075",
+        "#75F07D",
+        "#75F0D9",
+        // da qui in poi trasformo i primi 9 valori in HSL e diminuisco di 10 la loro luminosità ottenendo la seconda tranche di colori
+        "#4790EA",
+        "#7B47EA",
+        "#EA47E2"
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,7 +126,7 @@ else
 
     private void InitializeAvailableMonths()
     {
-        _availableMonths = Enum.GetValues<Month>();
+        _availableMonths = Enum.GetNames<Month>();
     }
 
     private void InitializeAvailableYears()
@@ -128,7 +146,7 @@ else
 
     private async Task OnMonthChange(object value)
     {
-        _selectedMonth = (Month)value;
+        _selectedMonth = Enum.Parse<Month>(value.ToString()!);
         await GetExpensesAsync();
     }
 
@@ -226,7 +244,7 @@ else
             }).GroupBy(d => d.Month, d => d.TotalExpense, (month, totalExpenses) => new MonthDataItem
             {
                 Month = month,
-                TotalExpense = totalExpenses.Sum()
+                TotalExpense = Math.Round(totalExpenses.Sum(), 2)
             }).ToList();
     }
 
@@ -239,7 +257,7 @@ else
             }).GroupBy(d => d.Category, d => d.TotalExpense, (category, totalExpenses) => new CategoryDataItem
         {
             Category = category,
-            TotalExpense = totalExpenses.Sum()
+                TotalExpense = Math.Round(totalExpenses.Sum(), 2)
         }).ToList();
     }
 
@@ -249,19 +267,19 @@ else
 
     private enum Month
     {
-        AllMonths = 0,
-        January = 1,
-        February = 2,
-        March = 3,
-        April = 4, 	
-        May = 5, 	
-        June = 6, 	
-        July = 7, 	
-        August = 8, 	
-        September = 9,
-        October = 10,
-        November = 11,
-        December = 12
+        AllMonths,
+        January,
+        February,
+        March,
+        April, 	
+        May, 	
+        June, 	
+        July, 	
+        August, 	
+        September,
+        October,
+        November,
+        December
     }
 
     private record MonthDataItem

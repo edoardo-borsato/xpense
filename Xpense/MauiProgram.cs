@@ -1,4 +1,5 @@
-﻿using Xpense.Utility;
+﻿using Radzen;
+using Xpense.Utility;
 
 namespace Xpense;
 
@@ -23,6 +24,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ExpensesManager>();
         builder.Services.AddSingleton<IFormatter, Formatter>();
         builder.Services.AddSingleton(_ => CreateNewDateFilter());
+        builder.Services.AddRadzenComponents();
 
         return builder.Build();
     }
