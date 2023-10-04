@@ -55,6 +55,25 @@ else
             <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
         </RadzenChart>
     </RadzenCard>
+    <RadzenCard Visible="@(_selectedMonth is not Month.AllMonths)">
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0" /> @Category.Others.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#F075E8" /> @Category.HealthAndPersonalCare.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#F0BA75" /> @Category.Transportation.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#75F07D" /> @Category.Entertainment.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#4790EA" /> @Category.Pets.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#EA47E2" /> @Category.Gifts.ToString()</RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#9C75F0" /> @Category.HousingAndSupplies.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#F0758C" /> @Category.Sport.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#C9F075" /> @Category.Clothing.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#75F0D9" /> @Category.BillsAndUtilities.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#7B47EA" /> @Category.Insurance.ToString()</RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
     <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
         <RadzenChart>
             <RadzenBarSeries Data="@_allYearDataGroupedByMonth" CategoryProperty="Month" Title="@_selectedYear.ToString()" LineType="LineType.Dashed" ValueProperty="TotalExpense"/>
@@ -71,6 +90,25 @@ else
             </RadzenPieSeries>
             <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
         </RadzenChart>
+    </RadzenCard>
+    <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0" /> @Category.Others.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#F075E8" /> @Category.HealthAndPersonalCare.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#F0BA75" /> @Category.Transportation.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#75F07D" /> @Category.Entertainment.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#4790EA" /> @Category.Pets.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#EA47E2" /> @Category.Gifts.ToString()</RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#9C75F0" /> @Category.HousingAndSupplies.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#F0758C" /> @Category.Sport.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#C9F075" /> @Category.Clothing.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#75F0D9" /> @Category.BillsAndUtilities.ToString()</RadzenText>
+                <RadzenText><RadzenIcon Icon="stop" style="color:#7B47EA" /> @Category.Insurance.ToString()</RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
     </RadzenCard>
 @*COLUMN*@
 @*<RadzenChart>
