@@ -9,31 +9,50 @@
 }
 else
 {
-    <button class="btn btn-primary" @onclick="@Back">Back</button>
+    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Click="@Back" Text="Back"></RadzenButton>
     <br />
-    <EditForm Model="Item" OnSubmit="@Submit">
-        <table class="table">
-            <tbody>
-                <tr class="h6">
-                    <th>Value (€)</th>
-                    <td><RadzenNumeric ShowUpDown="false" TValue="double" @bind-Value="@Item.Value" Class="w-100" /></td>
-                </tr>
-                <tr class="h6">
-                    <th>Reason</th>
-                    <td><RadzenTextBox @bind-Value="@Item.Reason" Class="w-100" /></td>
-                </tr>
-                <tr class="h6">
-                    <th>Date</th>
-                    <td><RadzenDatePicker @bind-Value=@Item.Date DateFormat="yyyy-MM-dd" Class="w-100" /></td>
-                </tr>
-                <tr class="h6">
-                    <th>Category</th>
-                    <td><RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(Category))" Change="@(OnCategoryChange)" Value="@Item.Category" /></td>
-                </tr>
-            </tbody>
-        </table>
-        <button class="btn btn-primary float-right" type="submit">Create</button>
-    </EditForm>
+    <RadzenCard>
+        <EditForm Model="Item" OnSubmit="@Submit">
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="3">
+                    <RadzenText TextStyle="TextStyle.H6"><strong>Value (€)</strong></RadzenText>
+                </RadzenColumn>
+                <RadzenColumn>
+                    <RadzenNumeric ShowUpDown="false" TValue="double" @bind-Value="@Item.Value" Class="w-100" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="3">
+                    <RadzenText TextStyle="TextStyle.H6"><strong>Reason</strong></RadzenText>
+                </RadzenColumn>
+                <RadzenColumn>
+                    <RadzenTextBox @bind-Value="@Item.Reason" Class="w-100" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="3">
+                    <RadzenText TextStyle="TextStyle.H6"><strong>Date</strong></RadzenText>
+                </RadzenColumn>
+                <RadzenColumn>
+                    <RadzenDatePicker @bind-Value=@Item.Date DateFormat="yyyy-MM-dd" Class="w-100" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="3">
+                    <RadzenText TextStyle="TextStyle.H6"><strong>Category</strong></RadzenText>
+                </RadzenColumn>
+                <RadzenColumn>
+                    <RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(Category))" Change="@(OnCategoryChange)" Value="@Item.Category" />
+                </RadzenColumn>
+            </RadzenRow>
+            <br />
+            <RadzenRow Gap="1rem" class="rz-text-align-right">
+                <RadzenColumn>
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Create"></RadzenButton>
+                </RadzenColumn>
+            </RadzenRow>
+        </EditForm>
+    </RadzenCard>
 }
 
 @code {

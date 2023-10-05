@@ -27,7 +27,7 @@ else
                 <RadzenText TextStyle="TextStyle.H4" Text="@Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))"></RadzenText>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow Gap="1rem">
+        <RadzenRow Gap="1rem" Visible="@(_selectedMonth is Month.AllMonths)">
             <RadzenColumn>
                 <RadzenText TextStyle="TextStyle.H4"><strong>AVG per month</strong></RadzenText>
             </RadzenColumn>
