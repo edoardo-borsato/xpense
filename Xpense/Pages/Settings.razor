@@ -9,23 +9,22 @@
 else
 {
     <EditForm Model="_settingsData" OnSubmit="@Submit">
-        <table class="table">
-            <tbody>
-                <tr class="h6">
-                    <th>Username</th>
-                </tr>
-                <tr class="h6">
-                    <td><RadzenTextBox @bind-Value="@_settingsData.Username" Class="w-100" /></td>
-                </tr>
-                <tr class="h6">
-                    <th>Expenses service URL</th>
-                </tr>
-                <tr>
-                    <td><RadzenTextBox @bind-Value="@_settingsData.Url" Class="w-100" ReadOnly="true" /></td>
-                </tr>
-            </tbody>
-        </table>
-        <button class="btn btn-primary float-right" type="submit">Save</button>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenRow Gap="1rem">
+                    <RadzenText TextStyle="TextStyle.H6"><strong>Username</strong></RadzenText>
+                </RadzenRow>
+                <RadzenRow Gap="1rem">
+                    <RadzenTextBox @bind-Value="@_settingsData.Username" Class="w-100" />
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+        <br />
+        <RadzenRow Gap="1rem" class="rz-text-align-right">
+            <RadzenColumn>
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Save"></RadzenButton>
+            </RadzenColumn>
+        </RadzenRow>
     </EditForm>
 }
 

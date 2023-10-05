@@ -11,30 +11,30 @@
 else
 {
     <RadzenCard>
-        <div class="row">
-            <div class="col h4 font-weight-bold">
-                Count
-            </div>
-            <div class="col h4">
-                @_expenses.Count()
-            </div>
-        </div>
-        <div class="row">
-            <div class="col h4 font-weight-bold">
-                Total
-            </div>
-            <div class="col h4">
-                @Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))
-            </div>
-        </div>
-        <div class="row">
-            <div class="col h4 font-weight-bold">
-                AVG per month
-            </div>
-            <div class="col h4">
-                @Formatter.FormatAsEuro(_averageExpensePerMonth)
-            </div>
-        </div>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4"><strong>Count</strong></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4" Text="@_expenses.Count().ToString()"></RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4"><strong>Total</strong></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4" Text="@Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))"></RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4"><strong>AVG per month</strong></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenText TextStyle="TextStyle.H4" Text="@Formatter.FormatAsEuro(_averageExpensePerMonth)"></RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
     </RadzenCard>
     <RadzenCard>
         <div class="row">
@@ -54,8 +54,6 @@ else
             </RadzenPieSeries>
             <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
         </RadzenChart>
-    </RadzenCard>
-    <RadzenCard Visible="@(_selectedMonth is not Month.AllMonths)">
         <RadzenRow>
             <RadzenColumn>
                 <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0" /> @Category.Others.ToString()</RadzenText>
@@ -90,8 +88,6 @@ else
             </RadzenPieSeries>
             <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
         </RadzenChart>
-    </RadzenCard>
-    <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
         <RadzenRow>
             <RadzenColumn>
                 <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0" /> @Category.Others.ToString()</RadzenText>
