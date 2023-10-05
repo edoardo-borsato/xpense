@@ -14,46 +14,49 @@ else
     <RadzenCard>
         <EditForm Model="Item" OnSubmit="@Submit">
             <RadzenRow Gap="1rem">
-                <RadzenColumn Size="3">
-                    <RadzenText TextStyle="TextStyle.H6"><strong>Id</strong></RadzenText>
-                </RadzenColumn>
-                <RadzenColumn >
-                    <RadzenText TextStyle="TextStyle.H6">@Item.Id</RadzenText>
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="1rem">
-                <RadzenColumn Size="3">
-                    <RadzenText TextStyle="TextStyle.H6"><strong>Value (€)</strong></RadzenText>
-                </RadzenColumn>
-                <RadzenColumn >
-                    <RadzenNumeric ShowUpDown="false" TValue="double" @bind-Value="@Item.ExpenseDetails.Value" Class="w-100" />
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="1rem">
-                <RadzenColumn Size="3">
-                    <RadzenText TextStyle="TextStyle.H6"><strong>Reason</strong></RadzenText>
-                </RadzenColumn>
-                <RadzenColumn >
-                    <RadzenTextBox @bind-Value="@Item.ExpenseDetails.Reason" Class="w-100" />
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="1rem">
-                <RadzenColumn Size="3">
-                    <RadzenText TextStyle="TextStyle.H6"><strong>Date</strong></RadzenText>
-                </RadzenColumn>
-                <RadzenColumn >
-                    <RadzenDatePicker @bind-Value=@Item.ExpenseDetails.Date DateFormat="yyyy-MM-dd" Class="w-100" />
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="1rem">
-                <RadzenColumn Size="3">
-                    <RadzenText TextStyle="TextStyle.H6"><strong>Category</strong></RadzenText>
-                </RadzenColumn>
-                <RadzenColumn >
-                    <RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(Category))" Change="@(OnCategoryChange)" Value="@Item.ExpenseDetails.Category" />
+                <RadzenColumn>
+                    <RadzenRow Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.H6"><strong>Value (€)</strong></RadzenText>
+                    </RadzenRow>
+                    <RadzenRow Gap="1rem">
+                        <RadzenNumeric ShowUpDown="false" TValue="double" @bind-Value="@Item.ExpenseDetails.Value" Class="w-100" />
+                    </RadzenRow>
                 </RadzenColumn>
             </RadzenRow>
             <br />
+            <RadzenRow Gap="1rem">
+                <RadzenColumn>
+                    <RadzenRow Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.H6"><strong>Reason</strong></RadzenText>
+                    </RadzenRow>
+                    <RadzenRow Gap="1rem">
+                        <RadzenTextBox @bind-Value="@Item.ExpenseDetails.Reason" Class="w-100" />
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <br />
+            <RadzenRow Gap="1rem">
+                <RadzenColumn>
+                    <RadzenRow Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.H6"><strong>Date</strong></RadzenText>
+                    </RadzenRow>
+                    <RadzenRow Gap="1rem">
+                        <RadzenDatePicker @bind-Value=@Item.ExpenseDetails.Date DateFormat="yyyy-MM-dd" Class="w-100" />
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <br />
+            <RadzenRow Gap="1rem">
+                <RadzenColumn>
+                    <RadzenRow Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.H6"><strong>Category</strong></RadzenText>
+                    </RadzenRow>
+                    <RadzenRow Gap="1rem">
+                        <RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(Category))" Change="@(OnCategoryChange)" Value="@Item.ExpenseDetails.Category" />
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <br/>
             <RadzenRow Gap="1rem" class="rz-text-align-right">
                 <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Icon="delete" Click="@DeleteExpenseAsync"></RadzenButton>
                 <RadzenColumn>
