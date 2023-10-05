@@ -1,5 +1,5 @@
 ﻿@page "/settings"
-@inject IDialogService DialogService
+@inject DialogService DialogService
 @inject ISettingsManager SettingsManager
 
 @if (_settingsData == null)
@@ -43,23 +43,40 @@ else
         }
         catch (Exception e)
         {
-            await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to retrieve settings. Error: {e}");
+            await DialogService.Alert($"Unable to retrieve settings. Error: {e.Message}", "Error", new AlertOptions
+            {
+                ShowClose = false,
+                OkButtonText = "Ok"
+            });
         }
     }
 
     private async Task Submit()
     {
-        var confirmed = await DialogService.ConfirmAsync("Save settings", "Are you sure you want to save settings?");
-        if (confirmed)
+        var confirmed = await DialogService.Confirm("Are you sure you want to save settings?", "Save settings", new ConfirmOptions
+        {
+            ShowClose = false,
+            OkButtonText = "Yes",
+            CancelButtonText = "No"
+        });
+        if (confirmed is not null && (bool)confirmed)
         {
             try
             {
                 SettingsManager.SetUsername(_settingsData.Username);
-                await DialogService.AlertAsync(AlertType.Success, "Save settings", "Settings saved");
+                await DialogService.Alert("Settings saved", "Save settings", new AlertOptions
+                {
+                    ShowClose = false,
+                    OkButtonText = "Ok"
+                });
             }
             catch (Exception e)
             {
-                await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to save settings. Error: {e}");
+                await DialogService.Alert($"Unable to save settings. Error: {e.Message}", "Error", new AlertOptions
+                {
+                        ShowClose = false,
+                        OkButtonText = "Ok"
+                });
             }
         }
     }

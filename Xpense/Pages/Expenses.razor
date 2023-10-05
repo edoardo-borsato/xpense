@@ -2,12 +2,12 @@
 @using Xpense.Utility
 @inject ExpensesManager ExpensesManager
 @inject NavigationManager NavigationManager
-@inject IDialogService DialogService
+@inject DialogService DialogService
 @inject IFormatter Formatter
 @inject ISettingsManager SettingsManager
 @inject DateFilter Filter
 
-@if (_expenses == null)
+@if (_loading)
 {
     <Loading />
 }
@@ -79,6 +79,7 @@ else
 }
 
 @code {
+    private bool _loading = true;
     private IEnumerable<Xpense.Expense> _expenses = Array.Empty<Xpense.Expense>();
 
     protected override async Task OnInitializedAsync()
@@ -86,7 +87,11 @@ else
         var username = SettingsManager.GetUsername();
         if (string.IsNullOrWhiteSpace(username))
         {
-            await DialogService.AlertAsync(AlertType.Info, "Username required", "No username has been configured, you will be redirected to the Settings page");
+            await DialogService.Alert("No username has been configured, you will be redirected to the Settings page", "Username required", new AlertOptions
+                {
+                    ShowClose = false,
+                    OkButtonText = "Ok"
+                });
             NavigationManager.NavigateTo("/settings");
         }
         else
@@ -109,12 +114,21 @@ else
     {
         try
         {
+            _loading = true;
             _expenses = (await ExpensesManager.GetAllAsync(Filter.From.ToString("yyyy-MM-dd"), Filter.To.ToString("yyyy-MM-dd"), null))
                 .OrderByDescending(e => e.ExpenseDetails.Date);
         }
         catch (Exception e)
         {
-            await DialogService.AlertAsync(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
+            await DialogService.Alert($"Cannot retrieve expenses. Error: {e.Message}", "Error", new AlertOptions
+            {
+                ShowClose = false,
+                OkButtonText = "Ok"
+            });
+        }
+        finally
+        {
+            _loading = false;
         }
     }
 

@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inject IDialogService DialogService
+@inject DialogService DialogService
 @inject ISettingsManager SettingsManager
 @inject NavigationManager NavigationManager
 
@@ -19,7 +19,11 @@
         _settingsLoaded = true;
         if (string.IsNullOrWhiteSpace(username))
         {
-            await DialogService.AlertAsync(AlertType.Info, "Username required", "No username has been configured, you will be redirected to the Settings page");
+            await DialogService.Alert("No username has been configured, you will be redirected to the Settings page", "Username required", new AlertOptions
+                {
+                    ShowClose = false,
+                    OkButtonText = "Ok"
+                });
             NavigationManager.NavigateTo("/settings");
         }
         else

@@ -1,7 +1,7 @@
 ﻿@page "/newexpense"
 @inject ExpensesManager ExpensesManager
 @inject NavigationManager NavigationManager
-@inject IDialogService DialogService
+@inject DialogService DialogService
 
 @if (Item == null)
 {
@@ -68,18 +68,31 @@ else
 
     private async Task Submit()
     {
-        var confirmed = await DialogService.ConfirmAsync("Create new expense", "Are you sure you want to create this new expense?");
-        if (confirmed)
+        var confirmed = await DialogService.Confirm("Are you sure you want to create this new expense?", "Create new expense", new ConfirmOptions
+        {
+            ShowClose = false,
+            OkButtonText = "Yes",
+            CancelButtonText = "No"
+        });
+        if (confirmed is not null && (bool)confirmed)
         {
             try
             {
                 var createdExpense = await ExpensesManager.CreateAsync(Item);
-                await DialogService.AlertAsync(AlertType.Success, "New Expense created", $"New expense with ID {createdExpense.Id} has been created");
+                await DialogService.Alert($"New expense with ID {createdExpense.Id} has been created", "New Expense created", new AlertOptions
+                {
+                        ShowClose = false,
+                        OkButtonText = "Ok"
+                });
                 NavigationManager.NavigateTo("expenses");
             }
             catch (Exception e)
             {
-                await DialogService.AlertAsync(AlertType.Error, "Error", $"Unable to create new expense. Error: {e}");
+                await DialogService.Alert($"Unable to create new expense. Error: {e.Message}", "Error", new AlertOptions
+                {
+                        ShowClose = false,
+                        OkButtonText = "Ok"
+                });
             }
         }
     }

@@ -1,10 +1,10 @@
 ﻿@page "/dashboard"
 @using Xpense.Utility
 @inject ExpensesManager ExpensesManager
-@inject IDialogService DialogService
+@inject DialogService DialogService
 @inject IFormatter Formatter
 
-@if (_expenses == null)
+@if (_loading)
 {
     <Loading/>
 }
@@ -117,6 +117,7 @@ else
     </RadzenChart>*@
 }
 @code {
+    private bool _loading = true;
     private IEnumerable<Xpense.Expense> _expenses = Array.Empty<Xpense.Expense>();
     private IList<MonthDataItem> _allYearDataGroupedByMonth;
     private IList<CategoryDataItem> _allYearDataGroupedByCategory;
@@ -188,6 +189,7 @@ else
     {
         try
         {
+            _loading = true;
             if (_selectedMonth is Month.AllMonths)
             {
                 _expenses = (await ExpensesManager.GetAllAsync(null, null, _selectedYear.ToString()))
@@ -212,7 +214,15 @@ else
         }
         catch (Exception e)
         {
-            await DialogService.AlertAsync(AlertType.Error, "Error", $"Cannot retrieve expenses. Error: {e}");
+            await DialogService.Alert($"Cannot retrieve expenses. Error: {e.Message}", "Error", new AlertOptions
+            {
+                ShowClose = false,
+                OkButtonText = "Ok"
+            });
+        }
+        finally
+        {
+            _loading = false;
         }
     }
 
