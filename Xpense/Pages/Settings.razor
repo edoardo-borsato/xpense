@@ -8,24 +8,26 @@
 }
 else
 {
-    <EditForm Model="_settingsData" OnSubmit="@Submit">
-        <RadzenRow Gap="1rem">
-            <RadzenColumn>
-                <RadzenRow Gap="1rem">
-                    <RadzenText TextStyle="TextStyle.H6"><strong>Username</strong></RadzenText>
-                </RadzenRow>
-                <RadzenRow Gap="1rem">
-                    <RadzenTextBox @bind-Value="@_settingsData.Username" Class="w-100" />
-                </RadzenRow>
-            </RadzenColumn>
-        </RadzenRow>
-        <br />
-        <RadzenRow Gap="1rem" class="rz-text-align-right">
-            <RadzenColumn>
-                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Save"></RadzenButton>
-            </RadzenColumn>
-        </RadzenRow>
-    </EditForm>
+    <RadzenCard>
+        <EditForm Model="_settingsData" OnSubmit="@Submit">
+            <RadzenRow Gap="1rem">
+                <RadzenColumn>
+                    <RadzenRow Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.H6"><strong>Username</strong></RadzenText>
+                    </RadzenRow>
+                    <RadzenRow Gap="1rem">
+                        <RadzenTextBox @bind-Value="@_settingsData.Username" Class="w-100" />
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <br />
+            <RadzenRow Gap="1rem" class="rz-text-align-right">
+                <RadzenColumn>
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Save"></RadzenButton>
+                </RadzenColumn>
+            </RadzenRow>
+        </EditForm>
+    </RadzenCard>
 }
 
 @code {
