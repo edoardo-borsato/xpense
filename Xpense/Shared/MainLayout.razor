@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject ThemeService ThemeService
+@inject ISettingsManager SettingsManager
+<link href="_content/Radzen.Blazor/css/@(ThemeService.CurrentTheme).css" rel="stylesheet" />
 <RadzenDialog />
 <RadzenNotification />
 <RadzenContextMenu />
@@ -14,3 +17,11 @@
 		</article>
 	</main>
 </div>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+		ThemeService.CurrentTheme = SettingsManager.GetTheme();
+    }
+}

@@ -20,6 +20,7 @@ public static class MauiProgram
         builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
         builder.Services.AddScoped<DialogService>();
+        builder.Services.AddScoped<ThemeService>();
         builder.Services.AddScoped<ISettingsManager, SettingsManager>();
         builder.Services.AddSingleton<ServiceClient>();
         builder.Services.AddSingleton<IFormatter, Formatter>();

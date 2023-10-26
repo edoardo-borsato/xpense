@@ -1,6 +1,8 @@
 ﻿@page "/settings"
 @inject DialogService DialogService
+@inject ThemeService ThemeService
 @inject ISettingsManager SettingsManager
+<link href="_content/Radzen.Blazor/css/@(ThemeService.CurrentTheme).css" rel="stylesheet" />
 
 @if (_settingsData == null)
 {
@@ -27,19 +29,29 @@ else
                 </RadzenColumn>
             </RadzenRow>
         </EditForm>
+        <br />
+        <RadzenRow Gap="1rem">
+            <RadzenColumn>
+                <RadzenRow Gap="1rem">
+                    <RadzenText TextStyle="TextStyle.H6"><strong>Theme</strong></RadzenText>
+                </RadzenRow>
+                <RadzenRow Gap="1rem">
+                    <RadzenDropDown TValue="string" TextProperty="Text" ValueProperty="Value" Data="@ThemeService.Themes" Value="@ThemeService.CurrentTheme" Change="@OnChangeTheme" Class="w-100" />
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
     </RadzenCard>
 }
 
 @code {
 
-    private readonly ExpensesServiceSettings _settingsData = new();
+    private readonly ServiceSettings _settingsData = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             _settingsData.Username = SettingsManager.GetUsername();
-            _settingsData.Url = SettingsManager.GetExpensesServiceUri().AbsoluteUri;
         }
         catch (Exception e)
         {
@@ -69,6 +81,7 @@ else
                     ShowClose = false,
                     OkButtonText = "Ok"
                 });
+                // ThemeService.Change(NavigationManager, SettingsManager.GetTheme());
             }
             catch (Exception e)
             {
@@ -81,9 +94,14 @@ else
         }
     }
 
-    private record ExpensesServiceSettings
+    private void OnChangeTheme(object value)
+    {
+        ThemeService.CurrentTheme = $"{value}";
+        SettingsManager.SetTheme(ThemeService.CurrentTheme);
+    }
+
+    private record ServiceSettings
     {
         public string Username { get; set; }
-        public string Url { get; set; }
     }
 }
