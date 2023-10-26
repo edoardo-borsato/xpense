@@ -1,4 +1,4 @@
-﻿@page "/expenses"
+﻿@page "/incomes"
 @using Xpense.Utility
 @inject ServiceClient ServiceClient
 @inject NavigationManager NavigationManager
@@ -19,7 +19,7 @@ else
                 <RadzenText TextStyle="TextStyle.H6"><strong>Count</strong></RadzenText>
             </RadzenColumn>
             <RadzenColumn>
-                <RadzenText TextStyle="TextStyle.H6" Text="@_expenses.Count().ToString()"></RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" Text="@_incomes.Count().ToString()"></RadzenText>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow Gap="1rem">
@@ -27,7 +27,7 @@ else
                 <RadzenText TextStyle="TextStyle.H6"><strong>Total</strong></RadzenText>
             </RadzenColumn>
             <RadzenColumn>
-                <RadzenText TextStyle="TextStyle.H6" Text="@Formatter.FormatAsEuro(_expenses.Sum(e => e.ExpenseDetails.Value))"></RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" Text="@Formatter.FormatAsEuro(_incomes.Sum(e => e.IncomeDetails.Value))"></RadzenText>
             </RadzenColumn>
         </RadzenRow>
     </RadzenCard>
@@ -37,7 +37,7 @@ else
                 <RadzenText Text="From"></RadzenText>
             </RadzenColumn>
             <RadzenColumn>
-                <RadzenDatePicker @bind-Value=@Filter.From DateFormat="yyyy-MM-dd" Class="w-100" Change="@GetExpensesAsync" />
+                <RadzenDatePicker @bind-Value=@Filter.From DateFormat="yyyy-MM-dd" Class="w-100" Change="@GetIncomesAsync" />
             </RadzenColumn>
         </RadzenRow>
         <br />
@@ -46,7 +46,7 @@ else
                 <RadzenText Text="To"></RadzenText>
             </RadzenColumn>
             <RadzenColumn>
-                <RadzenDatePicker @bind-Value=@Filter.To DateFormat="yyyy-MM-dd" Class="w-100" Change="@GetExpensesAsync" />
+                <RadzenDatePicker @bind-Value=@Filter.To DateFormat="yyyy-MM-dd" Class="w-100" Change="@GetIncomesAsync" />
             </RadzenColumn>
         </RadzenRow>
         <br />
@@ -57,19 +57,19 @@ else
         </RadzenRow>
     </RadzenCard>
     <RadzenCard class="rz-text-align-center">
-        <RadzenButton Click=@CreateNewExpense ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Icon="add" Text="Add new" Size="ButtonSize.Large"></RadzenButton>
+        <RadzenButton Click=@CreateNewIncome ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Icon="add" Text="Add new" Size="ButtonSize.Large"></RadzenButton>
     </RadzenCard>
     <RadzenCard>
-        <RadzenDataGrid RowClick="@RowClick" Data="@_expenses" TItem="Xpense.Expense" GridLines="DataGridGridLines.Default" AllowPaging="true" AllowSorting="false">
+        <RadzenDataGrid RowClick="@RowClick" Data="@_incomes" TItem="Xpense.Income" GridLines="DataGridGridLines.Default" AllowPaging="true" AllowSorting="false">
             <Columns>
-                <RadzenDataGridColumn TItem="Xpense.Expense" Property="ExpenseDetails.Date" Title="Date">
+                <RadzenDataGridColumn TItem="Xpense.Income" Property="IncomeDetails.Date" Title="Date">
                     <Template Context="detail">
-                        @detail.ExpenseDetails.Date.ToString("yyyy-MM-dd")
+                        @detail.IncomeDetails.Date.ToString("yyyy-MM-dd")
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Xpense.Expense" Property="ExpenseDetails.Value" Title="Value">
+                <RadzenDataGridColumn TItem="Xpense.Income" Property="IncomeDetails.Value" Title="Value">
                     <Template Context="detail">
-                        @Formatter.FormatAsEuro(detail.ExpenseDetails.Value)
+                        @Formatter.FormatAsEuro(detail.IncomeDetails.Value)
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
@@ -80,7 +80,7 @@ else
 
 @code {
     private bool _loading = true;
-    private IEnumerable<Xpense.Expense> _expenses = Array.Empty<Xpense.Expense>();
+    private IEnumerable<Xpense.Income> _incomes = Array.Empty<Xpense.Income>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,7 +96,7 @@ else
         }
         else
         {
-            await GetExpensesAsync();
+            await GetIncomesAsync();
         }
     }
 
@@ -107,24 +107,24 @@ else
         var firstDayOfNextMonth = firstDayOfCurrentMonth.AddMonths(1);
         Filter.From = firstDayOfCurrentMonth;
         Filter.To = firstDayOfNextMonth;
-        await GetExpensesAsync();
+        await GetIncomesAsync();
     }
 
-    private async Task GetExpensesAsync()
+    private async Task GetIncomesAsync()
     {
         try
         {
             _loading = true;
-            _expenses = (await ServiceClient.GetAllExpensesAsync(Filter.From.ToString("yyyy-MM-dd"), Filter.To.ToString("yyyy-MM-dd"), null))
-                .OrderByDescending(e => e.ExpenseDetails.Date);
+            _incomes = (await ServiceClient.GetAllIncomesAsync(Filter.From.ToString("yyyy-MM-dd"), Filter.To.ToString("yyyy-MM-dd"), null))
+                .OrderByDescending(e => e.IncomeDetails.Date);
         }
         catch (Exception e)
         {
-            await DialogService.Alert($"Cannot retrieve expenses. Error: {e.Message}", "Error", new AlertOptions
-            {
-                ShowClose = false,
-                OkButtonText = "Ok"
-            });
+            await DialogService.Alert($"Cannot retrieve incomes. Error: {e.Message}", "Error", new AlertOptions
+                {
+                    ShowClose = false,
+                    OkButtonText = "Ok"
+                });
         }
         finally
         {
@@ -132,19 +132,19 @@ else
         }
     }
 
-    private void GoToExpense(Guid? id)
+    private void GoToIncome(Guid? id)
     {
-        NavigationManager.NavigateTo($"expense/{id}");
+        NavigationManager.NavigateTo($"income/{id}");
     }
 
-    private void CreateNewExpense()
+    private void CreateNewIncome()
     {
-        NavigationManager.NavigateTo("new-expense");
+        NavigationManager.NavigateTo("new-income");
     }
 
-    private void RowClick(DataGridRowMouseEventArgs<Xpense.Expense> obj)
+    private void RowClick(DataGridRowMouseEventArgs<Xpense.Income> obj)
     {
-        GoToExpense(obj.Data.Id);
+        GoToIncome(obj.Data.Id);
     }
 
 }

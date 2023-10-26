@@ -4,16 +4,16 @@ using System.Text.Json.Serialization;
 
 namespace Xpense
 {
-    internal class ExpensesManager
+    internal class ServiceClient
     {
         private readonly ISettingsManager _settingsManager;
 
-        public ExpensesManager(ISettingsManager settingsManager)
+        public ServiceClient(ISettingsManager settingsManager)
         {
             _settingsManager = settingsManager;
         }
 
-        public async Task<IEnumerable<Expense>> GetAllAsync(string fromDate, string toDate, string inDate)
+        public async Task<IEnumerable<Expense>> GetAllExpensesAsync(string fromDate, string toDate, string inDate)
         {
             using var httpClient = new HttpClient();
             httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
@@ -28,7 +28,7 @@ namespace Xpense
             return await GetExpensesFromResponseAsync(response);
         }
 
-        public async Task<Expense> GetAsync(Guid id)
+        public async Task<Expense> GetExpenseAsync(Guid id)
         {
             using var httpClient = new HttpClient();
             httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
@@ -43,7 +43,7 @@ namespace Xpense
             return await GetExpenseFromResponseAsync(response);
         }
 
-        public async Task<Expense> CreateAsync(ExpenseDetails expenseDetails)
+        public async Task<Expense> CreateExpenseAsync(ExpenseDetails expenseDetails)
         {
             using var httpClient = new HttpClient();
             httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
@@ -58,7 +58,7 @@ namespace Xpense
             return await GetExpenseFromResponseAsync(response);
         }
 
-        public async Task<Expense> UpdateAsync(Guid id, ExpenseDetails expenseDetails)
+        public async Task<Expense> UpdateExpenseAsync(Guid id, ExpenseDetails expenseDetails)
         {
             using var httpClient = new HttpClient();
             httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
@@ -73,11 +73,84 @@ namespace Xpense
             return await GetExpenseFromResponseAsync(response);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteExpenseAsync(Guid id)
         {
             using var httpClient = new HttpClient();
             httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
             var request = CreateDeleteExpenseRequest(id);
+
+            var response = await httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                await RaiseException(response);
+            }
+        }
+
+        public async Task<IEnumerable<Income>> GetAllIncomesAsync(string fromDate, string toDate, string inDate)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateGetIncomesRequest(fromDate, toDate, inDate);
+
+            var response = await httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                await RaiseException(response);
+            }
+
+            return await GetIncomesFromResponseAsync(response);
+        }
+
+        public async Task<Income> GetIncomeAsync(Guid id)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateGetIncomeRequest(id);
+
+            var response = await httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                await RaiseException(response);
+            }
+
+            return await GetIncomeFromResponseAsync(response);
+        }
+
+        public async Task<Income> CreateIncomeAsync(IncomeDetails incomeDetails)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateCreateIncomeRequest(incomeDetails);
+
+            var response = await httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                await RaiseException(response);
+            }
+
+            return await GetIncomeFromResponseAsync(response);
+        }
+
+        public async Task<Income> UpdateIncomeAsync(Guid id, IncomeDetails incomeDetails)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateUpdateIncomeRequest(id, incomeDetails);
+
+            var response = await httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                await RaiseException(response);
+            }
+
+            return await GetIncomeFromResponseAsync(response);
+        }
+
+        public async Task DeleteIncomeAsync(Guid id)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = _settingsManager.GetExpensesServiceUri();
+            var request = CreateDeleteIncomeRequest(id);
 
             var response = await httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -136,6 +209,49 @@ namespace Xpense
             return request;
         }
 
+        private HttpRequestMessage CreateGetIncomesRequest(string fromDate, string toDate, string inDate)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/incomes?from={fromDate}&to={toDate}&in={inDate}");
+            AddUsernameHeader(request);
+            return request;
+        }
+
+        private HttpRequestMessage CreateGetIncomeRequest(Guid id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/incomes/{id}");
+            AddUsernameHeader(request);
+            return request;
+        }
+
+        private HttpRequestMessage CreateCreateIncomeRequest(IncomeDetails incomeDetails)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/incomes");
+            request.Content = JsonContent.Create(incomeDetails, null, new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            });
+            AddUsernameHeader(request);
+            return request;
+        }
+
+        private HttpRequestMessage CreateUpdateIncomeRequest(Guid id, IncomeDetails incomeDetails)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Put, $"api/incomes/{id}");
+            request.Content = JsonContent.Create(incomeDetails, null, new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            });
+            AddUsernameHeader(request);
+            return request;
+        }
+
+        private HttpRequestMessage CreateDeleteIncomeRequest(Guid id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"api/incomes/{id}");
+            AddUsernameHeader(request);
+            return request;
+        }
+
         private static async Task RaiseException(HttpResponseMessage response)
         {
             var statusCode = response.StatusCode;
@@ -156,6 +272,28 @@ namespace Xpense
             return expense;
         }
 
+        private static async Task<IEnumerable<Income>> GetIncomesFromResponseAsync(HttpResponseMessage response)
+        {
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            var incomes = (await JsonSerializer.DeserializeAsync<IEnumerable<Income>>(responseStream, new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            }))?.ToList();
+
+            return incomes;
+        }
+
+        private static async Task<Income> GetIncomeFromResponseAsync(HttpResponseMessage response)
+        {
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            var income = await JsonSerializer.DeserializeAsync<Income>(responseStream, new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            });
+
+            return income;
+        }
+
         private static async Task<IEnumerable<Expense>> GetExpensesFromResponseAsync(HttpResponseMessage response)
         {
             await using var responseStream = await response.Content.ReadAsStreamAsync();
@@ -168,6 +306,27 @@ namespace Xpense
         }
 
         #endregion
+    }
+
+    internal record Income
+    {
+        [JsonPropertyName("id")]
+        public Guid? Id { get; set; }
+
+        [JsonPropertyName("details")]
+        public IncomeDetails IncomeDetails { get; set; }
+    }
+
+    internal record IncomeDetails
+    {
+        [JsonPropertyName("value")]
+        public double Value { get; set; }
+
+        [JsonPropertyName("date")]
+        public DateTimeOffset Date { get; set; }
+
+        [JsonPropertyName("reason")]
+        public string Reason { get; set; }
     }
 
     internal record Expense

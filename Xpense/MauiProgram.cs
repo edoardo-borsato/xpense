@@ -21,7 +21,7 @@ public static class MauiProgram
 #endif
         builder.Services.AddScoped<DialogService>();
         builder.Services.AddScoped<ISettingsManager, SettingsManager>();
-        builder.Services.AddSingleton<ExpensesManager>();
+        builder.Services.AddSingleton<ServiceClient>();
         builder.Services.AddSingleton<IFormatter, Formatter>();
         builder.Services.AddSingleton(_ => CreateNewDateFilter());
         builder.Services.AddRadzenComponents();

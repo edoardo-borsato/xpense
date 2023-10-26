@@ -1,4 +1,4 @@
-﻿@page "/expense/{id}"
+﻿@page "/income/{id}"
 @inject ServiceClient ServiceClient
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
@@ -19,7 +19,7 @@ else
                         <RadzenText TextStyle="TextStyle.H6"><strong>Value (€)</strong></RadzenText>
                     </RadzenRow>
                     <RadzenRow Gap="1rem">
-                        <RadzenNumeric ShowUpDown="false" TValue="double" @bind-Value="@Item.ExpenseDetails.Value" Class="w-100" />
+                        <RadzenNumeric ShowUpDown="false" TValue="double" @bind-Value="@Item.IncomeDetails.Value" Class="w-100" />
                     </RadzenRow>
                 </RadzenColumn>
             </RadzenRow>
@@ -30,7 +30,7 @@ else
                         <RadzenText TextStyle="TextStyle.H6"><strong>Reason</strong></RadzenText>
                     </RadzenRow>
                     <RadzenRow Gap="1rem">
-                        <RadzenTextBox @bind-Value="@Item.ExpenseDetails.Reason" Class="w-100" />
+                        <RadzenTextBox @bind-Value="@Item.IncomeDetails.Reason" Class="w-100" />
                     </RadzenRow>
                 </RadzenColumn>
             </RadzenRow>
@@ -41,24 +41,13 @@ else
                         <RadzenText TextStyle="TextStyle.H6"><strong>Date</strong></RadzenText>
                     </RadzenRow>
                     <RadzenRow Gap="1rem">
-                        <RadzenDatePicker @bind-Value=@Item.ExpenseDetails.Date DateFormat="yyyy-MM-dd" Class="w-100" />
+                        <RadzenDatePicker @bind-Value=@Item.IncomeDetails.Date DateFormat="yyyy-MM-dd" Class="w-100" />
                     </RadzenRow>
                 </RadzenColumn>
             </RadzenRow>
             <br />
-            <RadzenRow Gap="1rem">
-                <RadzenColumn>
-                    <RadzenRow Gap="1rem">
-                        <RadzenText TextStyle="TextStyle.H6"><strong>Category</strong></RadzenText>
-                    </RadzenRow>
-                    <RadzenRow Gap="1rem">
-                        <RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(Category))" Change="@(OnCategoryChange)" Value="@Item.ExpenseDetails.Category" />
-                    </RadzenRow>
-                </RadzenColumn>
-            </RadzenRow>
-            <br/>
             <RadzenRow Gap="1rem" class="rz-text-align-right">
-                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Icon="delete" Click="@DeleteExpenseAsync"></RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Icon="delete" Click="@DeleteIncomeAsync"></RadzenButton>
                 <RadzenColumn>
                     <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Update"></RadzenButton>
                 </RadzenColumn>
@@ -71,7 +60,7 @@ else
     [Parameter]
     public string Id { get; set; }
 
-    private Xpense.Expense Item { get; set; }
+    private Xpense.Income Item { get; set; }
 
     private bool _loading = true;
 
@@ -80,12 +69,12 @@ else
         try
         {
             _loading = true;
-            Item = await ServiceClient.GetExpenseAsync(Guid.Parse(Id));
+            Item = await ServiceClient.GetIncomeAsync(Guid.Parse(Id));
             _loading = false;
         }
         catch (Exception e)
         {
-            await DialogService.Alert($"Unable to retrieve expense with ID {Id}. Error: {e}", "Error", new AlertOptions
+            await DialogService.Alert($"Unable to retrieve income with ID {Id}. Error: {e}", "Error", new AlertOptions
                 {
                     ShowClose = false,
                     OkButtonText = "Ok"
@@ -95,38 +84,7 @@ else
 
     private async Task Submit()
     {
-        var confirmed = await DialogService.Confirm($"Are you sure you want to update expense with ID {Id}?", "Update expense", new ConfirmOptions
-        {
-            ShowClose = false,
-            OkButtonText = "Yes",
-            CancelButtonText = "No"
-        });
-        if (confirmed is not null && (bool)confirmed)
-        {
-            try
-            {
-                var updatedExpense = await ServiceClient.UpdateExpenseAsync(Item.Id!.Value, Item.ExpenseDetails);
-                await DialogService.Alert($"Expense with ID {updatedExpense.Id} has been updated", "Update expense", new AlertOptions
-                {
-                        ShowClose = false,
-                        OkButtonText = "Ok"
-                });
-                Back();
-            }
-            catch (Exception e)
-            {
-                await DialogService.Alert($"Unable to update expense with ID {Id}. Error: {e.Message}", "Error", new AlertOptions
-                    {
-                        ShowClose = false,
-                        OkButtonText = "Ok"
-                    });
-            }
-        }
-    }
-
-    private async Task DeleteExpenseAsync()
-    {
-        var confirmed = await DialogService.Confirm($"Are you sure you want to delete expense with ID {Id}?", "Delete expense", new ConfirmOptions
+        var confirmed = await DialogService.Confirm($"Are you sure you want to update income with ID {Id}?", "Update income", new ConfirmOptions
             {
                 ShowClose = false,
                 OkButtonText = "Yes",
@@ -136,8 +94,8 @@ else
         {
             try
             {
-                await ServiceClient.DeleteExpenseAsync(Item.Id!.Value);
-                await DialogService.Alert($"Expense with ID {Id} has been deleted", "Delete expense", new AlertOptions
+                var updatedIncome = await ServiceClient.UpdateIncomeAsync(Item.Id!.Value, Item.IncomeDetails);
+                await DialogService.Alert($"Income with ID {updatedIncome.Id} has been updated", "Update Income", new AlertOptions
                     {
                         ShowClose = false,
                         OkButtonText = "Ok"
@@ -146,7 +104,38 @@ else
             }
             catch (Exception e)
             {
-                await DialogService.Alert($"Unable to delete expense with ID {Id}. Error: {e.Message}", "Error", new AlertOptions
+                await DialogService.Alert($"Unable to update income with ID {Id}. Error: {e.Message}", "Error", new AlertOptions
+                    {
+                        ShowClose = false,
+                        OkButtonText = "Ok"
+                    });
+            }
+        }
+    }
+
+    private async Task DeleteIncomeAsync()
+    {
+        var confirmed = await DialogService.Confirm($"Are you sure you want to delete income with ID {Id}?", "Delete income", new ConfirmOptions
+            {
+                ShowClose = false,
+                OkButtonText = "Yes",
+                CancelButtonText = "No"
+            });
+        if (confirmed is not null && (bool)confirmed)
+        {
+            try
+            {
+                await ServiceClient.DeleteIncomeAsync(Item.Id!.Value);
+                await DialogService.Alert($"Income with ID {Id} has been deleted", "Delete income", new AlertOptions
+                    {
+                        ShowClose = false,
+                        OkButtonText = "Ok"
+                    });
+                Back();
+            }
+            catch (Exception e)
+            {
+                await DialogService.Alert($"Unable to delete income with ID {Id}. Error: {e.Message}", "Error", new AlertOptions
                     {
                         ShowClose = false,
                         OkButtonText = "Ok"
@@ -157,12 +146,6 @@ else
 
     private void Back()
     {
-        NavigationManager.NavigateTo("expenses");
-    }
-
-    private void OnCategoryChange(object args)
-    {
-        var value = args.ToString();
-        Item.ExpenseDetails.Category = Enum.Parse<Category>(value!);
+        NavigationManager.NavigateTo("incomes");
     }
 }

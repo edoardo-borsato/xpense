@@ -1,4 +1,4 @@
-﻿@page "/new-expense"
+﻿@page "/new-income"
 @inject ServiceClient ServiceClient
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
@@ -46,17 +46,6 @@ else
                 </RadzenColumn>
             </RadzenRow>
             <br />
-            <RadzenRow Gap="1rem">
-                <RadzenColumn>
-                    <RadzenRow Gap="1rem">
-                        <RadzenText TextStyle="TextStyle.H6"><strong>Category</strong></RadzenText>
-                    </RadzenRow>
-                    <RadzenRow Gap="1rem">
-                        <RadzenDropDown AllowClear="false" Class="w-100" TValue="string" Data="@Enum.GetNames(typeof(Category))" Change="@(OnCategoryChange)" Value="@Item.Category" />
-                    </RadzenRow>
-                </RadzenColumn>
-            </RadzenRow>
-            <br/>
             <RadzenRow Gap="1rem" class="rz-text-align-right">
                 <RadzenColumn>
                     <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Create"></RadzenButton>
@@ -67,11 +56,11 @@ else
 }
 
 @code {
-    private ExpenseDetails Item { get; set; }
+    private IncomeDetails Item { get; set; }
 
     protected override void OnInitialized()
     {
-        Item = new ExpenseDetails
+        Item = new IncomeDetails
             {
                 Date = DateTimeOffset.Now
             };
@@ -79,43 +68,37 @@ else
 
     private async Task Submit()
     {
-        var confirmed = await DialogService.Confirm("Are you sure you want to create this new expense?", "Create new expense", new ConfirmOptions
-        {
-            ShowClose = false,
-            OkButtonText = "Yes",
-            CancelButtonText = "No"
-        });
+        var confirmed = await DialogService.Confirm("Are you sure you want to create this new income?", "Create new income", new ConfirmOptions
+            {
+                ShowClose = false,
+                OkButtonText = "Yes",
+                CancelButtonText = "No"
+            });
         if (confirmed is not null && (bool)confirmed)
         {
             try
             {
-                var createdExpense = await ServiceClient.CreateExpenseAsync(Item);
-                await DialogService.Alert($"New expense with ID {createdExpense.Id} has been created", "New Expense created", new AlertOptions
-                {
+                var createdIncome = await ServiceClient.CreateIncomeAsync(Item);
+                await DialogService.Alert($"New income with ID {createdIncome.Id} has been created", "New income created", new AlertOptions
+                    {
                         ShowClose = false,
                         OkButtonText = "Ok"
-                });
-                NavigationManager.NavigateTo("expenses");
+                    });
+                NavigationManager.NavigateTo("incomes");
             }
             catch (Exception e)
             {
-                await DialogService.Alert($"Unable to create new expense. Error: {e.Message}", "Error", new AlertOptions
-                {
+                await DialogService.Alert($"Unable to create new income. Error: {e.Message}", "Error", new AlertOptions
+                    {
                         ShowClose = false,
                         OkButtonText = "Ok"
-                });
+                    });
             }
         }
     }
 
     private void Back()
     {
-        NavigationManager.NavigateTo("expenses");
-    }
-
-    private void OnCategoryChange(object args)
-    {
-        var value = args.ToString();
-        Item.Category = Enum.Parse<Category>(value!);
+        NavigationManager.NavigateTo("incomes");
     }
 }
