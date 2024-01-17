@@ -43,8 +43,6 @@ else
                 <RadzenText TextStyle="TextStyle.H6" Text="@Formatter.FormatAsEuro(_averageIncomePerMonth)"></RadzenText>
             </RadzenColumn>
         </RadzenRow>
-    </RadzenCard>
-    <RadzenCard>
         <div class="row">
             <div class="col h4">
                 <RadzenDropDown AllowClear="false" TValue="int" Class="w-100" Data="@_availableYears" Change="@(OnYearChange)" Value="@_selectedYear" />
@@ -53,92 +51,95 @@ else
                 <RadzenDropDown AllowClear="false" TValue="string" Class="w-100" Data="@_availableMonths" Change="@(OnMonthChange)" Value="@_selectedMonth.ToString()" />
             </div>
         </div>
-    </RadzenCard>
 
-    <RadzenCard Visible="@(_selectedMonth is not Month.AllMonths)">
-        <RadzenChart>
-            <RadzenBarSeries Data="@_expensesForCurrentMonth" CategoryProperty="Month" Title="Expenses" ValueProperty="TotalExpense" />
-            <RadzenBarSeries Data="@_incomesForCurrentMonth" CategoryProperty="Month" Title="Incomes" ValueProperty="TotalIncome" />
-            <RadzenCategoryAxis Padding="20" Formatter="@Formatter.FormatAsMonth" />
-            <RadzenValueAxis Formatter="@Formatter.FormatAsEuro" Min="0">
-                <RadzenGridLines Visible="true" />
-                <RadzenAxisTitle Text="@_selectedMonth.ToString()" />
-            </RadzenValueAxis>
-            <RadzenBarOptions Radius="5" />
-        </RadzenChart>
-    </RadzenCard>
-    <RadzenCard Visible="@(_selectedMonth is not Month.AllMonths)">
-        <RadzenChart>
-            <RadzenPieSeries Data="@_selectedMonthExpensesGroupedByCategory" Title="@_selectedMonth.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense" Fills="@PASTEL_COLOR_PALETTE">
-            </RadzenPieSeries>
-            <RadzenLegend Visible="false" Position="LegendPosition.Bottom"/>
-        </RadzenChart>
-        <RadzenRow>
-            <RadzenColumn>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0"/> @Category.Others.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#F075E8"/> @Category.HealthAndPersonalCare.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#F0BA75"/> @Category.Transportation.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#75F07D"/> @Category.Entertainment.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#4790EA"/> @Category.Pets.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#EA47E2"/> @Category.Gifts.ToString()</RadzenText>
-            </RadzenColumn>
-            <RadzenColumn>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#9C75F0"/> @Category.HousingAndSupplies.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#F0758C"/> @Category.Sport.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#C9F075"/> @Category.Clothing.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#75F0D9"/> @Category.BillsAndUtilities.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#7B47EA"/> @Category.Insurance.ToString()</RadzenText>
-            </RadzenColumn>
-        </RadzenRow>
-    </RadzenCard>
-    <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
-        @* <RadzenChart>
-            <RadzenLineSeries Data="@_allYearExpensesGroupedByMonth" CategoryProperty="Month" Title="Expenses" ValueProperty="TotalExpense">
-                <RadzenMarkers MarkerType="MarkerType.Square" />
-            </RadzenLineSeries>
-            <RadzenLineSeries Data="_allYearIncomesGroupedByMonth" CategoryProperty="Month" Title="Incomes" ValueProperty="TotalIncome">
-                <RadzenMarkers MarkerType="MarkerType.Square" />
-            </RadzenLineSeries>
-            <RadzenCategoryAxis Padding="20" Formatter="@Formatter.FormatAsMonth" />
-            <RadzenValueAxis Formatter="@Formatter.FormatAsEuro">
-                <RadzenGridLines Visible="true" />
-                <RadzenAxisTitle Text="Cash flow" />
-            </RadzenValueAxis>
+        @if (_expensesByMonths.Any(e => e.TotalExpense > 0) || _incomesByMonths.Any(i => i.TotalIncome > 0))
+        {
+            <RadzenCard Visible="@(_selectedMonth is not Month.AllMonths)">
+                <RadzenChart>
+                    <RadzenBarSeries Data="@_expensesByMonths" CategoryProperty="Month" Title="Expenses" ValueProperty="TotalExpense" />
+                    <RadzenBarSeries Data="@_incomesByMonths" CategoryProperty="Month" Title="Incomes" ValueProperty="TotalIncome" />
+                    <RadzenCategoryAxis Padding="20" Formatter="@Formatter.FormatAsMonth" />
+                    <RadzenValueAxis Formatter="@Formatter.FormatAsEuro" Min="0">
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="@_selectedMonth.ToString()" />
+                    </RadzenValueAxis>
+                    <RadzenBarOptions Radius="5" />
+                </RadzenChart>
+                <RadzenChart>
+                    <RadzenPieSeries Data="@_selectedMonthExpensesGroupedByCategory" Title="@_selectedMonth.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense" Fills="@PASTEL_COLOR_PALETTE">
+                    </RadzenPieSeries>
+                    <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
+                </RadzenChart>
+                <RadzenRow>
+                    <RadzenColumn>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0" /> @Category.Others.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#F075E8" /> @Category.HealthAndPersonalCare.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#F0BA75" /> @Category.Transportation.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#75F07D" /> @Category.Entertainment.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#4790EA" /> @Category.Pets.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#EA47E2" /> @Category.Gifts.ToString()</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#9C75F0" /> @Category.HousingAndSupplies.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#F0758C" /> @Category.Sport.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#C9F075" /> @Category.Clothing.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#75F0D9" /> @Category.BillsAndUtilities.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#7B47EA" /> @Category.Insurance.ToString()</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+        }
+
+        @if (_allYearExpensesGroupedByMonth.Any(e => e.TotalExpense > 0))
+        {
+            <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
+                @* <RadzenChart>
+        <RadzenLineSeries Data="@_allYearExpensesGroupedByMonth" CategoryProperty="Month" Title="Expenses" ValueProperty="TotalExpense">
+        <RadzenMarkers MarkerType="MarkerType.Square" />
+        </RadzenLineSeries>
+        <RadzenLineSeries Data="_allYearIncomesGroupedByMonth" CategoryProperty="Month" Title="Incomes" ValueProperty="TotalIncome">
+        <RadzenMarkers MarkerType="MarkerType.Square" />
+        </RadzenLineSeries>
+        <RadzenCategoryAxis Padding="20" Formatter="@Formatter.FormatAsMonth" />
+        <RadzenValueAxis Formatter="@Formatter.FormatAsEuro">
+        <RadzenGridLines Visible="true" />
+        <RadzenAxisTitle Text="Cash flow" />
+        </RadzenValueAxis>
         </RadzenChart> *@
 
-        <RadzenChart>
-            <RadzenBarSeries Data="@_allYearExpensesGroupedByMonth" CategoryProperty="Month" Title="Expenses" ValueProperty="TotalExpense"/>
-            <RadzenCategoryAxis Padding="20" Formatter="@Formatter.FormatAsMonth" />
-            <RadzenValueAxis Formatter="@Formatter.FormatAsEuro" Min="0">
-                <RadzenGridLines Visible="true"/>
-                <RadzenAxisTitle Text="@_selectedYear.ToString()"/>
-            </RadzenValueAxis>
-            <RadzenBarOptions Radius="5"/>
-        </RadzenChart>
-    </RadzenCard>
-    <RadzenCard Visible="@(_selectedMonth is Month.AllMonths)">
-        <RadzenChart>
-            <RadzenPieSeries Data="@_allYearExpensesGroupedByCategory" Title="@_selectedYear.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense" Fills="@PASTEL_COLOR_PALETTE">
-            </RadzenPieSeries>
-            <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
-        </RadzenChart>
-        <RadzenRow>
-            <RadzenColumn>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0" /> @Category.Others.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#F075E8" /> @Category.HealthAndPersonalCare.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#F0BA75" /> @Category.Transportation.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#75F07D" /> @Category.Entertainment.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#4790EA" /> @Category.Pets.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#EA47E2" /> @Category.Gifts.ToString()</RadzenText>
-            </RadzenColumn>
-            <RadzenColumn>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#9C75F0" /> @Category.HousingAndSupplies.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#F0758C" /> @Category.Sport.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#C9F075" /> @Category.Clothing.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#75F0D9" /> @Category.BillsAndUtilities.ToString()</RadzenText>
-                <RadzenText><RadzenIcon Icon="stop" style="color:#7B47EA" /> @Category.Insurance.ToString()</RadzenText>
-            </RadzenColumn>
-        </RadzenRow>
+                <RadzenChart>
+                    <RadzenBarSeries Data="@_allYearExpensesGroupedByMonth" CategoryProperty="Month" Title="Expenses" ValueProperty="TotalExpense" />
+                    <RadzenCategoryAxis Padding="20" Formatter="@Formatter.FormatAsMonth" />
+                    <RadzenValueAxis Formatter="@Formatter.FormatAsEuro" Min="0">
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="@_selectedYear.ToString()" />
+                    </RadzenValueAxis>
+                    <RadzenBarOptions Radius="5" />
+                </RadzenChart>
+                <RadzenChart>
+                    <RadzenPieSeries Data="@_allYearExpensesGroupedByCategory" Title="@_selectedYear.ToString()" CategoryProperty="Category" ValueProperty="TotalExpense" Fills="@PASTEL_COLOR_PALETTE">
+                    </RadzenPieSeries>
+                    <RadzenLegend Visible="false" Position="LegendPosition.Bottom" />
+                </RadzenChart>
+                <RadzenRow>
+                    <RadzenColumn>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#75ABF0" /> @Category.Others.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#F075E8" /> @Category.HealthAndPersonalCare.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#F0BA75" /> @Category.Transportation.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#75F07D" /> @Category.Entertainment.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#4790EA" /> @Category.Pets.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#EA47E2" /> @Category.Gifts.ToString()</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#9C75F0" /> @Category.HousingAndSupplies.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#F0758C" /> @Category.Sport.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#C9F075" /> @Category.Clothing.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#75F0D9" /> @Category.BillsAndUtilities.ToString()</RadzenText>
+                        <RadzenText><RadzenIcon Icon="stop" style="color:#7B47EA" /> @Category.Insurance.ToString()</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+        }
     </RadzenCard>
 }
 @code {
@@ -149,8 +150,8 @@ else
     private IList<IncomesByMonth> _allYearIncomesGroupedByMonth;
     private IList<ExpensesByCategory> _allYearExpensesGroupedByCategory;
     private IList<ExpensesByCategory> _selectedMonthExpensesGroupedByCategory;
-    private IList<ExpensesByMonth> _expensesForCurrentMonth;
-    private IList<IncomesByMonth> _incomesForCurrentMonth;
+    private IList<ExpensesByMonth> _expensesByMonths;
+    private IList<IncomesByMonth> _incomesByMonths;
     private IList<int> _availableYears;
     private IList<string> _availableMonths;
     private int _selectedYear;
@@ -186,8 +187,8 @@ else
         _allYearExpensesGroupedByCategory = new List<ExpensesByCategory>();
         _selectedMonthExpensesGroupedByCategory = new List<ExpensesByCategory>();
         _allYearIncomesGroupedByMonth = new List<IncomesByMonth>();
-        _expensesForCurrentMonth = new List<ExpensesByMonth>();
-        _incomesForCurrentMonth = new List<IncomesByMonth>();
+        _expensesByMonths = new List<ExpensesByMonth>();
+        _incomesByMonths = new List<IncomesByMonth>();
         await GetExpensesAsync();
         await GetIncomesAsync();
     }
@@ -245,12 +246,12 @@ else
                 _averageIncomePerMonth = _incomes.Select(d => d.IncomeDetails.Value).Sum();
                 var incomesForCurrentMonth = new List<IncomesByMonth>();
                 var incomeForCurrentMonth = new IncomesByMonth
-                {
+                    {
                         Month = ((int)_selectedMonth).ToString(),
-                    TotalIncome = _averageIncomePerMonth
-                };
+                        TotalIncome = _averageIncomePerMonth
+                    };
                 incomesForCurrentMonth.Add(incomeForCurrentMonth);
-                _incomesForCurrentMonth = incomesForCurrentMonth;
+                _incomesByMonths = incomesForCurrentMonth;
             }
         }
         catch (Exception e)
@@ -299,7 +300,7 @@ else
                         TotalExpense = _averageExpensePerMonth
                     };
                 expensesForCurrentMonth.Add(expenseForCurrentMonth);
-                _expensesForCurrentMonth = expensesForCurrentMonth;
+                _expensesByMonths = expensesForCurrentMonth;
             }
         }
         catch (Exception e)
@@ -339,10 +340,10 @@ else
         {
             var dataOfTheMonth = groupedData.FirstOrDefault(d => d.Month == month.ToString());
             finalData.Add(dataOfTheMonth ?? new IncomesByMonth
-            {
-                Month = month.ToString(),
-                TotalIncome = 0
-            });
+                {
+                    Month = month.ToString(),
+                    TotalIncome = 0
+                });
         }
 
         return finalData;
