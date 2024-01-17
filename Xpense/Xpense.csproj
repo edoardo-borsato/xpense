@@ -39,7 +39,7 @@
         <AndroidSigningKeyStore></AndroidSigningKeyStore>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-android|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
       <AndroidPackageFormat>apk</AndroidPackageFormat>
     </PropertyGroup>
 
