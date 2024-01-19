@@ -65,6 +65,8 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
       <PackageReference Include="Radzen.Blazor" Version="4.24.0" />
+      <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.3" />
+      <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.3" />
     </ItemGroup>
 
     <ItemGroup>
